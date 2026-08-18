@@ -50,6 +50,11 @@ jobs:
           PUBLIC_DATA_URL: ${{ env.PUBLIC_BASE_PATH }}/data/data.json
           PUBLIC_ASPECTS_URL: ${{ env.PUBLIC_BASE_PATH }}/data/aspects.json
 
+      - name: Copy preview files to dist
+        run: |
+          mkdir -p "aixd-threatmap-master 2/dist/preview"
+          cp ai_democracy_map_new_preview.html "aixd-threatmap-master 2/dist/preview/"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
