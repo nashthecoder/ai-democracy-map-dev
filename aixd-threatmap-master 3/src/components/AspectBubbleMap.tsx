@@ -1,0 +1,388 @@
+"use client";
+
+import { SelectAsFilter } from "@/components/SelectAsFilter";
+import { VizLegend } from "@/components/VizLegend";
+import { VizPanelCard } from "@/components/VizPanelCard";
+import { VizTooltip } from "@/components/VizTooltip";
+import type { AspectMap, Item, VizFilter } from "@/lib/types";
+import { withAlpha } from "@/lib/codes";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { forceCollide, forceManyBody, forceSimulation, forceX, forceY } from "d3";
+
+const VIEW_W = 1040;
+// Taller than the other panels (480): the 4-corner cluster layout needs the
+// extra vertical room for the clusters + their labels to breathe. The carousel
+// measures each panel's height on view, so this just makes Q1 taller — nothing
+// downstream jumps.
+const VIEW_H = 680;
+const ZOOM = 1.18;
+// Vertical room reserved below every bubble for its caption, fed into the
+// collide force so captions never land on a neighbouring bubble or caption.
+const CAPTION_RESERVE = 26;
+
+// P4D brand tokens (globals.css): brick / grassroot / blue / lime.
+const PILLAR_COLORS: Record<string, string> = {
+  "1": "#963735",
+  "2": "#00B140",
+  "3": "#92C2FF",
+  "4": "#D9E021",
+};
+
+const PILLAR_LABELS: Record<string, string> = {
+  "1": "Citizenship, Law and Rights",
+  "2": "Representative and Accountable Government",
+  "3": "Civil Society and Popular Participation",
+  "4": "Transnational Dynamics",
+};
+
+// Short labels from codebook `docs/4_Codebook Democracy Aspects for AI 20260821.txt`
+// so the bubble captions fit without 2-line wrap colliding inside a corner cluster.
+const SHORT_LABELS: Record<string, string> = {
+  "1.1": "Nationhood",
+  "1.2": "Rule of Law",
+  "1.3": "Civil Rights",
+  "1.4": "Social Rights",
+  "2.1": "Elections",
+  "2.2": "Parties",
+  "2.3": "Accountable Govt",
+  "2.4": "Legislature",
+  "2.5": "Judiciary",
+  "2.6": "Subnational",
+  "2.7": "Security Oversight",
+  "2.8": "Policy Influence",
+  "3.1": "Journalistic Media",
+  "3.2": "Political Participation",
+  "4.1": "External Influence",
+  "4.2": "Impact Abroad",
+};
+
+const TITLE = "Which democracy aspects are more frequent across threats?";
+const HIGHLIGHT = "democracy aspects";
+const NOTE = "* the data collected does not include information on which tactics/threats are more effective or grave";
+
+type BubbleNode = {
+  code: string;
+  name: string;
+  pillar: string | null;
+  freq: number;
+  x: number;
+  y: number;
+  r: number;
+};
+
+function wrapLabelLines(text: string, maxChars = 16, maxLines = 2): string[] {
+  const words = (text || "").split(" ");
+  const lines: string[] = [];
+  let cur = "";
+  for (const w of words) {
+    const candidate = cur ? `${cur} ${w}` : w;
+    if (candidate.length > maxChars && cur) {
+      lines.push(cur);
+      cur = w;
+      if (lines.length >= maxLines) break;
+    } else {
+      cur = candidate;
+    }
+  }
+  if (cur && lines.length < maxLines) lines.push(cur);
+  const consumedLen = lines.join(" ").length;
+  if (words.join(" ").length > consumedLen && lines.length > 0) {
+    lines[lines.length - 1] = lines[lines.length - 1].replace(/.{0,3}$/, "…");
+  }
+  return lines;
+}
+
+const formatCount = (n: number) => new Intl.NumberFormat("en").format(n);
+
+type LegendGroup = { color: string; label: string; codes: string[] };
+
+type AspectBubbleMapProps = {
+  items: Item[];
+  aspects: AspectMap;
+  onFilterTable?: (target: VizFilter) => void;
+};
+
+export const AspectBubbleMap = ({ items, aspects, onFilterTable }: AspectBubbleMapProps) => {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [hoveredCode, setHoveredCode] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [focused, setFocused] = useState<string | null>(null);
+
+  const freq = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const item of items) {
+      if (item.isDuplicate) continue;
+      for (const code of item.aspects ?? []) c[code] = (c[code] ?? 0) + 1;
+    }
+    return c;
+  }, [items]);
+
+  const nodes = useMemo<BubbleNode[]>(() => {
+    const flat: { code: string; name: string; pillar: string | null; freq: number; value: number }[] = Object.values(
+      aspects
+    ).map((a) => ({
+      code: a.code,
+      name: a.name,
+      pillar: a.pillarCode,
+      freq: freq[a.code] ?? 0,
+      value: (freq[a.code] ?? 0) + 1,
+    }));
+    const unknownTotal = Object.entries(freq)
+      .filter(([code]) => !aspects[code])
+      .reduce((sum, [, v]) => sum + v, 0);
+    if (unknownTotal > 0) {
+      flat.push({ code: "Other", name: "Other / unclassified codes", pillar: null, freq: unknownTotal, value: unknownTotal + 1 });
+    }
+    // 4-corner clustering: each pillar in its own quadrant, inset from edges
+    // so middle stays open (distinct gap). Global radius keeps cross-pillar
+    // size comparable (pack per-pillar would normalize away frequency).
+    // Rows spread wider (0.25 / 0.74, was 0.28 / 0.72) so clusters use the full
+    // canvas height instead of leaving a dead band above the legend. 0.74 keeps
+    // the largest bottom bubble + its 2-line label clear of the viewBox edge.
+    // Pull corners slightly further to card edges (0.24/0.76) to add gutter
+    // around labels; height 600 gives ~260px between top/bottom rows.
+    const CORNERS: Record<string, { x: number; y: number }> = {
+      "1": { x: VIEW_W * 0.24, y: VIEW_H * 0.29 },
+      "2": { x: VIEW_W * 0.76, y: VIEW_H * 0.29 },
+      "3": { x: VIEW_W * 0.24, y: VIEW_H * 0.72 },
+      "4": { x: VIEW_W * 0.76, y: VIEW_H * 0.72 },
+    };
+    const maxVal = Math.max(1, ...flat.map((d) => d.value));
+    // Enlarged bubbles. The collide force adds CAPTION_RESERVE so the caption
+    // slot under each bubble is kept clear of neighbours.
+    const getR = (v: number) => (12 + 31 * Math.sqrt(v / maxVal)) * ZOOM;
+    const simNodes: any[] = flat.map((d) => ({
+      ...d,
+      r: getR(d.value),
+      x: (CORNERS[d.pillar ?? "4"]?.x ?? VIEW_W / 2) + (Math.random() - 0.5) * 36,
+      y: (CORNERS[d.pillar ?? "4"]?.y ?? VIEW_H / 2) + (Math.random() - 0.5) * 36,
+    }));
+    const sim = forceSimulation(simNodes)
+      .force("collide", forceCollide<any>((d: any) => d.r + CAPTION_RESERVE).strength(0.98))
+      .force("x", forceX<any>((d: any) => CORNERS[d.pillar ?? "4"]?.x ?? VIEW_W / 2).strength(0.1))
+      .force("y", forceY<any>((d: any) => CORNERS[d.pillar ?? "4"]?.y ?? VIEW_H / 2).strength(0.1))
+      .force("charge", forceManyBody().strength(-10))
+      .stop();
+    for (let i = 0; i < 360; i++) sim.tick();
+    // Clamp inside viewBox
+    for (const n of simNodes) {
+      n.x = Math.max(n.r + 6, Math.min(VIEW_W - n.r - 6, n.x));
+      n.y = Math.max(n.r + 6, Math.min(VIEW_H - n.r - 6, n.y));
+    }
+    return simNodes.map((n) => ({ code: n.code, name: n.name, pillar: n.pillar, freq: n.freq, x: n.x, y: n.y, r: n.r }));
+  }, [aspects, freq]);
+
+  const maxR = useMemo(() => Math.max(1, ...nodes.map((n) => n.r)), [nodes]);
+  // Tooltip target: whatever is hovered, else whatever is pinned by a click.
+  // A click keeps the tooltip up until the same node is clicked again, and
+  // expands it — hover shows the one-line definition, a pinned click shows the
+  // full codebook description.
+  const tipNode = nodes.find((n) => n.code === (hoveredCode ?? selected)) ?? null;
+  const tipPinned = tipNode != null && selected === tipNode.code;
+  const tipDescription = tipNode
+    ? (tipPinned ? aspects[tipNode.code]?.description : aspects[tipNode.code]?.definition) ?? ""
+    : "";
+
+  const selectedTarget: VizFilter | null =
+    selected && selected !== "Other"
+      ? { key: "aspect", codes: [selected], label: aspects[selected]?.name ?? selected }
+      : null;
+
+  const legendGroups = useMemo<LegendGroup[]>(
+    () =>
+      ["1", "2", "3", "4"].map((p) => ({
+        color: PILLAR_COLORS[p],
+        label: PILLAR_LABELS[p],
+        codes: Object.values(aspects)
+          .filter((a) => a.pillarCode === p)
+          .map((a) => a.code),
+      })),
+    [aspects]
+  );
+
+  // Actual rendered tooltip height, measured after paint so the clamp is exact
+  // (hover card ≈ 130px, pinned full-description card ≈ 260px).
+  const [tipH, setTipH] = useState(0);
+  useLayoutEffect(() => {
+    const t = mapRef.current?.querySelector('[role="tooltip"]') as HTMLElement | null;
+    const h = t?.offsetHeight ?? 0;
+    setTipH((prev) => (Math.abs(prev - h) > 1 ? h : prev));
+  }, [tipNode?.code, tipPinned, tipDescription]);
+
+  const placeTooltip = useCallback(
+    (n: BubbleNode) => {
+      const el = mapRef.current;
+      if (!el) return { left: 0, top: 0 };
+      const rect = el.getBoundingClientRect();
+      const TIP_W = 220; // dark VizTooltip maxWidth
+      const h = tipH || (tipPinned ? 260 : 130);
+
+      // The 4-corner layout keeps the centre cross of the canvas permanently
+      // clear (clusters sit at ~27% / 73% across, ~25% / 74% down). Park the
+      // tooltip there so it never covers a bubble or label:
+      //  · always horizontally centred in the visible canvas
+      //  · nudged vertically toward the row the hovered node is in, so it
+      //    still reads as "this belongs to that bubble"
+      //  · clamped by its measured height so it's never clipped by the card
+      const left = Math.min(
+        Math.max(12, (rect.width - TIP_W) / 2),
+        Math.max(12, rect.width - TIP_W - 12)
+      );
+      const bias = n.y < VIEW_H / 2 ? 26 : -26; // top node → below mid; bottom → above
+      const rawTop = rect.height / 2 + bias - h / 2;
+      const top = Math.min(Math.max(12, rawTop), Math.max(12, rect.height - h - 12));
+      return { left, top };
+    },
+    [tipH, tipPinned]
+  );
+
+  // Center viz on small screens so 4-corner clusters appear balanced
+  // (default scrollLeft 0 shows only TL cluster). Runs on mount + resize.
+  useLayoutEffect(() => {
+    const scroller = mapRef.current?.querySelector("div.overflow-x-auto") as HTMLDivElement | null;
+    if (!scroller) return;
+    const center = () => {
+      if (scroller.clientWidth < scroller.scrollWidth) {
+        scroller.scrollLeft = (scroller.scrollWidth - scroller.clientWidth) / 2;
+      }
+    };
+    center();
+    const ro = new ResizeObserver(center);
+    ro.observe(scroller);
+    window.addEventListener("resize", center);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", center);
+    };
+  }, []);
+
+  return (
+    <VizPanelCard id="viz-aspect-bubble-map" title={TITLE} highlights={[HIGHLIGHT]} note={NOTE}>
+      <div
+        ref={mapRef}
+        className="relative mt-2"
+        style={{ height: VIEW_H }}
+        onClick={(e) => {
+          if (!(e.target as Element).closest(".viz-node")) {
+            setHoveredCode(null);
+            setSelected(null);
+            setFocused(null);
+          }
+        }}
+      >
+        <div className="overflow-x-auto" style={{ height: VIEW_H }}>
+          <svg
+            width="100%"
+            height={VIEW_H}
+            viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+            style={{ display: "block", minWidth: VIEW_W }}
+            role="img"
+            aria-label={TITLE}
+            onClick={(e) => {
+              // Click on empty canvas (not a bubble) resets focus/selection
+              if (!(e.target as Element).closest(".viz-node")) {
+                setHoveredCode(null);
+                setSelected(null);
+                setFocused(null);
+              }
+            }}
+          >
+            <g>
+              {nodes.map((n) => {
+                const color = n.pillar ? PILLAR_COLORS[n.pillar] : "#5C5C52";
+                const activeCode = hoveredCode ?? selected;
+                const isHovered = hoveredCode === n.code;
+                const isSel = selected === n.code;
+                const isFocus = focused === n.code;
+                // While a node is hovered/selected, grey every other node out so
+                // the focused one reads clearly.
+                const dimmed = activeCode != null && n.code !== activeCode;
+                return (
+                  <g key={n.code}>
+                    {isFocus && (
+                      <circle cx={n.x} cy={n.y} r={n.r + 3} fill="none" stroke="#963735" strokeWidth={2} />
+                    )}
+                    <circle
+                      className="viz-node"
+                      cx={n.x}
+                      cy={n.y}
+                      r={n.r}
+                      fill={dimmed ? "#CBC6BB" : color}
+                      opacity={dimmed ? 0.5 : 0.92}
+                      stroke={dimmed ? "#EAE5D8" : "#ffffff"}
+                      strokeWidth={isHovered || isSel ? 3 : 1.5}
+                      tabIndex={0}
+                      role="button"
+                      aria-pressed={isSel}
+                      aria-label={`${n.name}, ${formatCount(n.freq)} entries coded`}
+                      style={{ transition: "fill 140ms ease, opacity 140ms ease, stroke 140ms ease, stroke-width 120ms ease", cursor: "default" }}
+                      onMouseEnter={() => setHoveredCode(n.code)}
+                      onMouseLeave={() => setHoveredCode(null)}
+                      onFocus={() => setFocused(n.code)}
+                      onBlur={() => setFocused(null)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelected(isSel ? null : n.code);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") setSelected(isSel ? null : n.code);
+                      }}
+                    />
+                  </g>
+                );
+              })}
+              {nodes.map((n) => {
+                const showLabel = n.r > maxR * 0.38;
+                if (!showLabel) return null;
+                const label = SHORT_LABELS[n.code] ?? n.name;
+                const lines = wrapLabelLines(label, 14, 2);
+                const activeCode = hoveredCode ?? selected;
+                const dimmed = activeCode != null && n.code !== activeCode;
+                return (
+                  <text
+                    key={`label-${n.code}`}
+                    x={n.x}
+                    y={n.y + n.r + 18}
+                    textAnchor="middle"
+                    fontSize={10.5}
+                    fontWeight={700}
+                    fill={dimmed ? "#B4AEA1" : "#22201a"}
+                    stroke="#F4F4EA"
+                    strokeWidth={3}
+                    paintOrder="stroke"
+                    style={{ transition: "fill 140ms ease", pointerEvents: "none" }}
+                  >
+                    {lines.map((line, i) => (
+                      <tspan key={i} x={n.x} dy={i === 0 ? 0 : 11}>
+                        {line}
+                      </tspan>
+                    ))}
+                  </text>
+                );
+              })}
+            </g>
+          </svg>
+        </div>
+
+        {tipNode && (
+          <VizTooltip
+            variant="dark"
+            title={tipNode.name}
+            description={tipDescription}
+            count={`${formatCount(tipNode.freq)} mention${tipNode.freq === 1 ? "" : "s"}`}
+            {...placeTooltip(tipNode)}
+          />
+        )}
+      </div>
+
+      <VizLegend groups={legendGroups} topGap={10} activeCode={hoveredCode ?? selected} />
+      {selectedTarget && onFilterTable && (
+        <SelectAsFilter
+          target={selectedTarget}
+          onApply={onFilterTable}
+          onDismiss={() => setSelected(null)}
+        />
+      )}
+    </VizPanelCard>
+  );
+};

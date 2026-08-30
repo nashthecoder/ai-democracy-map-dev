@@ -1,0 +1,140 @@
+"use client";
+
+import { useLayoutEffect, useRef, useState, type ReactNode, Children } from "react";
+
+export const MapCarousel = ({
+  children,
+  footer,
+}: {
+  children: ReactNode | ReactNode[];
+  // Optional slot rendered below the dots, inside the carousel card —
+  // e.g. QuestionBox, separated by a rule + generous top padding so it
+  // doesn't read as part of the pagination.
+  footer?: ReactNode;
+}) => {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [index, setIndex] = useState(0);
+  // Panels vary a lot in natural height (e.g. the aspect bubble map vs. the
+  // dense mechanism graphs). A plain flex row stretches every slide to match
+  // the tallest one, which strands the pagination dots and footer far below
+  // a shorter panel's real content. Instead we measure the ACTIVE panel and
+  // size the scroller to just that, so dots/footer always sit right under
+  // whatever's actually showing.
+  const [height, setHeight] = useState<number | undefined>(undefined);
+  const panels = Children.toArray(children);
+  const count = panels.length;
+
+  useLayoutEffect(() => {
+    const el = panelRefs.current[index];
+    if (!el) return;
+    const measure = () => setHeight(el.offsetHeight);
+    measure();
+    // Re-measure after paint (late web-font / async data layout) and on
+    // viewport resize, so the scroller can never stay taller than the
+    // active panel and strand the dots below a block of white space.
+    const raf = requestAnimationFrame(measure);
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener("resize", measure);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [index]);
+
+  const scrollToIndex = (i: number) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const clamped = Math.max(0, Math.min(count - 1, i));
+    el.scrollTo({ left: clamped * el.clientWidth, behavior: "smooth" });
+    setIndex(clamped);
+  };
+
+  const onScroll = () => {
+    const el = scrollerRef.current;
+    if (!el || el.clientWidth === 0) return;
+    setIndex(Math.round(el.scrollLeft / el.clientWidth));
+  };
+
+  return (
+    <div className="overflow-hidden rounded-[20px] border border-border bg-card">
+      <div className="relative">
+        <div
+          ref={scrollerRef}
+          onScroll={onScroll}
+          className="p4d-hide-scrollbar flex overflow-x-auto"
+          style={{
+            scrollSnapType: "x mandatory",
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+            height: height ? `${height}px` : undefined,
+            transition: "height 200ms ease",
+          }}
+        >
+          {panels.map((panel, i) => (
+            <div
+              key={i}
+              ref={(el) => {
+                panelRefs.current[i] = el;
+              }}
+              className="flex min-w-full flex-col self-start p-5 pb-3 sm:p-6 sm:pb-3"
+              style={{ scrollSnapAlign: "start" }}
+            >
+              {panel}
+            </div>
+          ))}
+        </div>
+
+        <button
+          aria-label="Previous map"
+          onClick={() => scrollToIndex(index - 1)}
+          disabled={index === 0}
+          className="absolute left-2.5 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full text-base text-background disabled:cursor-default"
+          style={{
+            background: index === 0 ? "#1a1a1740" : "#1a1a17",
+            color: "#fff",
+          }}
+        >
+          ‹
+        </button>
+        <button
+          aria-label="Next map"
+          onClick={() => scrollToIndex(index + 1)}
+          disabled={index === count - 1}
+          className="absolute right-2.5 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full text-base text-background disabled:cursor-default"
+          style={{
+            background: index === count - 1 ? "#1a1a1740" : "#1a1a17",
+            color: "#fff",
+          }}
+        >
+          ›
+        </button>
+      </div>
+
+      <div className="flex items-center justify-center gap-1.5 pb-4 pt-2">
+        {panels.map((_, i) => (
+          <button
+            key={i}
+            aria-label={`Go to map ${i + 1}`}
+            onClick={() => scrollToIndex(i)}
+            className="cursor-pointer rounded-full border-none p-0"
+            style={{
+              width: i === index ? 18 : 6,
+              height: 6,
+              background: i === index ? "var(--color-p4d-brick)" : "var(--color-p4d-border, #D6D6CA)",
+              transition: "width 150ms ease",
+            }}
+          />
+        ))}
+      </div>
+
+      {footer && (
+        <div className="flex justify-center border-t border-border px-5 pb-5 pt-5 sm:px-6">
+          {footer}
+        </div>
+      )}
+    </div>
+  );
+};
