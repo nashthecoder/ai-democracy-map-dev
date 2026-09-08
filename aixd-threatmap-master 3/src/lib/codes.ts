@@ -18,6 +18,18 @@ const harmNameOf = (code: string, taxonomy?: HarmTaxonomy) =>
 const benefitNameOf = (code: string, taxonomy?: BenefitTaxonomy) =>
   taxonomy?.codes?.[code]?.label ?? taxonomy?.codes?.[code]?.name ?? code;
 
+// Canonical public-facing label from the taxonomy codebooks ("accessible label"
+// column 7 of CODEBOOKS), i.e. the readable name used in the table, expanded
+// rows and filters. The legacy mock label maps (HM2_L / HM2_BEN_NAME) hold a
+// mix of old sub-cluster names and new accessible ones — all map panels must
+// resolve through this first so nothing stale leaks out.
+const accessibleLabelOf = (
+  code: string,
+  harmTaxonomy?: HarmTaxonomy,
+  benefitTaxonomy?: BenefitTaxonomy
+): string | undefined =>
+  harmTaxonomy?.codes?.[code]?.label ?? benefitTaxonomy?.codes?.[code]?.label;
+
 // Brand tokens (globals.css) where one fits the cluster; the remaining slots
 // use a hand-picked categorical scale (brand only defines ~4 semantic hues).
 const BENEFIT_CLUSTER_COLORS: Record<string, string> = {
@@ -57,6 +69,7 @@ export {
   benefitClusterOf,
   benefitNameOf,
   harmNameOf,
+  accessibleLabelOf,
   BENEFIT_CLUSTER_COLORS,
   withAlpha,
   mixInk,

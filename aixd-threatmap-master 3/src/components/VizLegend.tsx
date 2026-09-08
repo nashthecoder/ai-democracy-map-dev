@@ -13,12 +13,16 @@ export const VizLegend = ({
   groups,
   topGap = 14,
   activeCode,
+  showCodes = true,
 }: {
   groups: LegendItem[];
   // Space between the panel body and the legend rule. Raise it per-panel when
   // the map above needs more breathing room below its labels.
   topGap?: number;
   activeCode?: string | null;
+  // Prints the code IDs (e.g. "1.1, 2.3") alongside each group label. Client
+  // wants these numbers gone from the legenda, so panels opt out via false.
+  showCodes?: boolean;
 }) => (
   <div
     style={{
@@ -71,7 +75,7 @@ export const VizLegend = ({
             />
             <span>{g.label}</span>
           </div>
-          <div>{g.codes.join(", ")}</div>
+          {showCodes && <div>{g.codes.join(", ")}</div>}
         </div>
       );
     })}

@@ -18,7 +18,8 @@ const VIEW_H = 680;
 const ZOOM = 1.18;
 // Vertical room reserved below every bubble for its caption, fed into the
 // collide force so captions never land on a neighbouring bubble or caption.
-const CAPTION_RESERVE = 26;
+// Kept modest so clusters pack tight (bubbles sit close together).
+const CAPTION_RESERVE = 20;
 
 // P4D brand tokens (globals.css): brick / grassroot / blue / lime.
 const PILLAR_COLORS: Record<string, string> = {
@@ -58,7 +59,7 @@ const SHORT_LABELS: Record<string, string> = {
 
 const TITLE = "Which democracy aspects are more frequent across threats?";
 const HIGHLIGHT = "democracy aspects";
-const NOTE = "* the data collected does not include information on which tactics/threats are more effective or grave";
+const NOTE = "* as mentioned in the sources (the data collected does not include information on which threats and mitigations are more impactful)";
 
 type BubbleNode = {
   code: string;
@@ -134,18 +135,21 @@ export const AspectBubbleMap = ({ items, aspects, onFilterTable }: AspectBubbleM
       flat.push({ code: "Other", name: "Other / unclassified codes", pillar: null, freq: unknownTotal, value: unknownTotal + 1 });
     }
     // 4-corner clustering: each pillar in its own quadrant, inset from edges
-    // so middle stays open (distinct gap). Global radius keeps cross-pillar
-    // size comparable (pack per-pillar would normalize away frequency).
-    // Rows spread wider (0.25 / 0.74, was 0.28 / 0.72) so clusters use the full
-    // canvas height instead of leaving a dead band above the legend. 0.74 keeps
-    // the largest bottom bubble + its 2-line label clear of the viewBox edge.
-    // Pull corners slightly further to card edges (0.24/0.76) to add gutter
-    // around labels; height 600 gives ~260px between top/bottom rows.
+    // so the middle stays open (distinct centre cross for the parked tooltip).
+    // Corners sit further into the corners (0.21 / 0.79 across, 0.24 / 0.78
+    // down) than the original build so the centre gap is wide enough for the
+    // full tooltip to float without covering bubbles or captions. Global
+    // radius keeps cross-pillar size comparable (pack per-pillar would
+    // normalize away frequency). Rows spread so clusters use the full canvas
+    // height instead of leaving a dead band above the legend; 0.78 keeps the
+    // largest bottom bubble + its 2-line label clear of the viewBox edge.
+    // Smaller random jitter + a smaller caption reserve pack each pillar's
+    // bubbles closer together.
     const CORNERS: Record<string, { x: number; y: number }> = {
-      "1": { x: VIEW_W * 0.24, y: VIEW_H * 0.29 },
-      "2": { x: VIEW_W * 0.76, y: VIEW_H * 0.29 },
-      "3": { x: VIEW_W * 0.24, y: VIEW_H * 0.72 },
-      "4": { x: VIEW_W * 0.76, y: VIEW_H * 0.72 },
+      "1": { x: VIEW_W * 0.21, y: VIEW_H * 0.24 },
+      "2": { x: VIEW_W * 0.79, y: VIEW_H * 0.24 },
+      "3": { x: VIEW_W * 0.21, y: VIEW_H * 0.78 },
+      "4": { x: VIEW_W * 0.79, y: VIEW_H * 0.78 },
     };
     const maxVal = Math.max(1, ...flat.map((d) => d.value));
     // Enlarged bubbles. The collide force adds CAPTION_RESERVE so the caption
@@ -154,8 +158,8 @@ export const AspectBubbleMap = ({ items, aspects, onFilterTable }: AspectBubbleM
     const simNodes: any[] = flat.map((d) => ({
       ...d,
       r: getR(d.value),
-      x: (CORNERS[d.pillar ?? "4"]?.x ?? VIEW_W / 2) + (Math.random() - 0.5) * 36,
-      y: (CORNERS[d.pillar ?? "4"]?.y ?? VIEW_H / 2) + (Math.random() - 0.5) * 36,
+      x: (CORNERS[d.pillar ?? "4"]?.x ?? VIEW_W / 2) + (Math.random() - 0.5) * 22,
+      y: (CORNERS[d.pillar ?? "4"]?.y ?? VIEW_H / 2) + (Math.random() - 0.5) * 22,
     }));
     const sim = forceSimulation(simNodes)
       .force("collide", forceCollide<any>((d: any) => d.r + CAPTION_RESERVE).strength(0.98))
@@ -218,7 +222,7 @@ export const AspectBubbleMap = ({ items, aspects, onFilterTable }: AspectBubbleM
       const h = tipH || (tipPinned ? 260 : 130);
 
       // The 4-corner layout keeps the centre cross of the canvas permanently
-      // clear (clusters sit at ~27% / 73% across, ~25% / 74% down). Park the
+      // clear (clusters sit at ~21% / 79% across, ~24% / 78% down). Park the
       // tooltip there so it never covers a bubble or label:
       //  · always horizontally centred in the visible canvas
       //  · nudged vertically toward the row the hovered node is in, so it
@@ -375,7 +379,7 @@ export const AspectBubbleMap = ({ items, aspects, onFilterTable }: AspectBubbleM
         )}
       </div>
 
-      <VizLegend groups={legendGroups} topGap={10} activeCode={hoveredCode ?? selected} />
+      <VizLegend groups={legendGroups} topGap={10} activeCode={hoveredCode ?? selected} showCodes={false} />
       {selectedTarget && onFilterTable && (
         <SelectAsFilter
           target={selectedTarget}

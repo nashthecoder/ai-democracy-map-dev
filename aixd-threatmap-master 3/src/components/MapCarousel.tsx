@@ -8,8 +8,8 @@ export const MapCarousel = ({
 }: {
   children: ReactNode | ReactNode[];
   // Optional slot rendered below the dots, inside the carousel card —
-  // e.g. QuestionBox, separated by a rule + generous top padding so it
-  // doesn't read as part of the pagination.
+  // separated by a rule + generous top padding so it doesn't read as
+  // part of the pagination.
   footer?: ReactNode;
 }) => {
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -22,6 +22,12 @@ export const MapCarousel = ({
   // size the scroller to just that, so dots/footer always sit right under
   // whatever's actually showing.
   const [height, setHeight] = useState<number | undefined>(undefined);
+  // Arrows are anchored OUTSIDE the height-changing slide track (which is
+  // sized to the active panel) at the vertical center of the TALLEST panel,
+  // measured once. Anchoring them to the track would make them ride up/down
+  // as slide heights differ — a fixed chrome anchor keeps them still while
+  // clicking through rapidly, even though the viz below resizes.
+  const [arrowCenter, setArrowCenter] = useState<number | undefined>(undefined);
   const panels = Children.toArray(children);
   const count = panels.length;
 
@@ -44,6 +50,24 @@ export const MapCarousel = ({
     };
   }, [index]);
 
+  useLayoutEffect(() => {
+    const els = panelRefs.current.filter((el): el is HTMLDivElement => Boolean(el));
+    if (!els.length) return;
+    const measure = () => {
+      let max = 0;
+      for (const el of els) max = Math.max(max, el.offsetHeight);
+      if (max > 0) setArrowCenter((prev) => (prev === max / 2 ? prev : max / 2));
+    };
+    const ro = new ResizeObserver(measure);
+    els.forEach((el) => ro.observe(el));
+    measure();
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [panels]);
+
   const scrollToIndex = (i: number) => {
     const el = scrollerRef.current;
     if (!el) return;
@@ -59,81 +83,92 @@ export const MapCarousel = ({
   };
 
   return (
-    <div className="overflow-hidden rounded-[20px] border border-border bg-card">
-      <div className="relative">
-        <div
-          ref={scrollerRef}
-          onScroll={onScroll}
-          className="p4d-hide-scrollbar flex overflow-x-auto"
-          style={{
-            scrollSnapType: "x mandatory",
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            height: height ? `${height}px` : undefined,
-            transition: "height 200ms ease",
-          }}
-        >
-          {panels.map((panel, i) => (
-            <div
+    <div className="relative">
+      <div className="mx-10 rounded-[20px] border border-border bg-card">
+        <div className="relative">
+          <div
+            ref={scrollerRef}
+            onScroll={onScroll}
+            className="p4d-hide-scrollbar flex overflow-x-auto"
+            style={{
+              scrollSnapType: "x mandatory",
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",
+              height: height ? `${height}px` : undefined,
+            }}
+          >
+            {panels.map((panel, i) => (
+              <div
+                key={i}
+                ref={(el) => {
+                  panelRefs.current[i] = el;
+                }}
+                className="flex min-w-full flex-col self-start p-5 pb-3 sm:p-6 sm:pb-3"
+                style={{ scrollSnapAlign: "start" }}
+              >
+                {panel}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center gap-1.5 pb-4 pt-2">
+          {panels.map((_, i) => (
+            <button
               key={i}
-              ref={(el) => {
-                panelRefs.current[i] = el;
+              aria-label={`Go to map ${i + 1}`}
+              onClick={() => scrollToIndex(i)}
+              className="cursor-pointer rounded-full border-none p-0"
+              style={{
+                width: i === index ? 18 : 6,
+                height: 6,
+                background: i === index ? "var(--color-p4d-brick)" : "var(--color-p4d-border, #D6D6CA)",
+                transition: "width 150ms ease",
               }}
-              className="flex min-w-full flex-col self-start p-5 pb-3 sm:p-6 sm:pb-3"
-              style={{ scrollSnapAlign: "start" }}
-            >
-              {panel}
-            </div>
+            />
           ))}
         </div>
 
-        <button
-          aria-label="Previous map"
-          onClick={() => scrollToIndex(index - 1)}
-          disabled={index === 0}
-          className="absolute left-2.5 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full text-base text-background disabled:cursor-default"
-          style={{
-            background: index === 0 ? "#1a1a1740" : "#1a1a17",
-            color: "#fff",
-          }}
-        >
-          ‹
-        </button>
-        <button
-          aria-label="Next map"
-          onClick={() => scrollToIndex(index + 1)}
-          disabled={index === count - 1}
-          className="absolute right-2.5 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full text-base text-background disabled:cursor-default"
-          style={{
-            background: index === count - 1 ? "#1a1a1740" : "#1a1a17",
-            color: "#fff",
-          }}
-        >
-          ›
-        </button>
+        {footer && (
+          <div className="flex justify-center border-t border-border px-5 pb-5 pt-5 sm:px-6">
+            {footer}
+          </div>
+        )}
       </div>
 
-      <div className="flex items-center justify-center gap-1.5 pb-4 pt-2">
-        {panels.map((_, i) => (
+      {arrowCenter !== undefined && (
+        <>
           <button
-            key={i}
-            aria-label={`Go to map ${i + 1}`}
-            onClick={() => scrollToIndex(i)}
-            className="cursor-pointer rounded-full border-none p-0"
+            aria-label="Previous map"
+            onClick={() => scrollToIndex(index - 1)}
+            disabled={index === 0}
+            className="absolute z-10 flex size-9 items-center justify-center rounded-full text-base text-background disabled:cursor-default"
             style={{
-              width: i === index ? 18 : 6,
-              height: 6,
-              background: i === index ? "var(--color-p4d-brick)" : "var(--color-p4d-border, #D6D6CA)",
-              transition: "width 150ms ease",
+              top: arrowCenter,
+              left: 0,
+              transform: "translateY(-50%)",
+              background: index === 0 ? "#1a1a1740" : "#1a1a17",
+              color: "#fff",
             }}
-          />
-        ))}
-      </div>
-
-      {footer && (
-        <div className="flex justify-center border-t border-border px-5 pb-5 pt-5 sm:px-6">
-          {footer}
-        </div>
+          >
+            ‹
+          </button>
+          <button
+            aria-label="Next map"
+            onClick={() => scrollToIndex(index + 1)}
+            disabled={index === count - 1}
+            className="absolute z-10 flex size-9 items-center justify-center rounded-full text-base text-background disabled:cursor-default"
+            style={{
+              top: arrowCenter,
+              right: 0,
+              transform: "translateY(-50%)",
+              background: index === count - 1 ? "#1a1a1740" : "#1a1a17",
+              color: "#fff",
+            }}
+          >
+            ›
+          </button>
+        </>
       )}
     </div>
   );

@@ -14,7 +14,8 @@ import {
 import { HM2_TIER_SHORT } from "@/lib/pathways";
 import { TIER_COLORS } from "@/lib/tiers";
 import { useSvgPanZoom } from "@/lib/useSvgPanZoom";
-import { mixInk, withAlpha } from "@/lib/codes";
+import { accessibleLabelOf, mixInk, withAlpha } from "@/lib/codes";
+import type { BenefitTaxonomy, HarmTaxonomy } from "@/lib/types";
 import type { VizFilter } from "@/lib/types";
 import { useMemo, useState } from "react";
 
@@ -34,7 +35,7 @@ const BOT = 460;
 
 const TITLE = "Which pro-democracy activities are frequently linked to which harm mechanisms?";
 const FOOTNOTE =
-  "* the data collected does not include information on which tactics/threats are more effective or grave";
+  "* as mentioned in the sources (the data collected does not include information on which threats and mitigations are more impactful)";
 
 const fmt = (n: number) => new Intl.NumberFormat("en").format(n);
 
@@ -67,13 +68,23 @@ interface BoxEl {
 
 export const BipartiteMorphMap = ({
   onFilterTable,
+  harmTaxonomy,
+  benefitTaxonomy,
 }: {
   onFilterTable?: (target: VizFilter) => void;
+  harmTaxonomy?: HarmTaxonomy;
+  benefitTaxonomy?: BenefitTaxonomy;
 }) => {
   const [view, setView] = useState<BipState>({ type: "overview" });
   const pz = useSvgPanZoom(0.5, 4);
 
-  const v = useMemo(() => buildBenefitView(view), [view]);
+  const v = useMemo(
+    () => buildBenefitView(view, harmTaxonomy, benefitTaxonomy),
+    [view, harmTaxonomy, benefitTaxonomy]
+  );
+
+  const blabel = (c: string) =>
+    accessibleLabelOf(c, harmTaxonomy, benefitTaxonomy) ?? HM2_BEN_NAME[c] ?? c;
 
   const changeView = (nv: BipState) => {
     setView(nv);
@@ -229,7 +240,7 @@ export const BipartiteMorphMap = ({
     });
     bensShown.forEach((b) => {
       const sub = (codesR[b] || []).filter((c) => c !== b);
-      items.push({ key: "b-" + b, color: HM2_BEN_COLOR[b], label: `${b} ${HM2_BEN_NAME[b]}`, sub: sub.join(", ") });
+      items.push({ key: "b-" + b, color: HM2_BEN_COLOR[b], label: `${b} ${blabel(b)}`, sub: sub.join(", ") });
     });
     return items;
   }, [v]);
@@ -289,20 +300,20 @@ export const BipartiteMorphMap = ({
           />
         </div>
 
-        <div style={{ marginTop: 14, fontSize: 12.5, color: "#5C5C52", lineHeight: 1.55 }}>{note}</div>
+        {note && <div style={{ marginTop: 14, fontSize: 12.5, color: "#5C5C52", lineHeight: 1.55 }}>{note}</div>}
       </div>
 
       {view.type === "tier" && onFilterTable && (() => {
-        const target: VizFilter = { key: "harm", codes: [view.t], label: `${view.t} — ${HM2_TIER_SHORT[view.t] ?? view.t}` };
+        const target: VizFilter = { key: "harm", codes: [view.t], label: HM2_TIER_SHORT[view.t] ?? view.t };
         return <SelectAsFilter target={target} onApply={onFilterTable} />;
       })()}
       {view.type === "ben" && onFilterTable && (() => {
-        const target: VizFilter = { key: "benefit", codes: [view.b], label: `${view.b} ${HM2_BEN_NAME[view.b] ?? view.b}` };
+        const target: VizFilter = { key: "benefit", codes: [view.b], label: blabel(view.b) };
         return <SelectAsFilter target={target} onApply={onFilterTable} />;
       })()}
       {view.type === "edge" && onFilterTable && (() => {
-        const harmTarget: VizFilter = { key: "harm", codes: [view.t], label: view.t };
-        const benefitTarget: VizFilter = { key: "benefit", codes: [view.b], label: view.b };
+        const harmTarget: VizFilter = { key: "harm", codes: [view.t], label: HM2_TIER_SHORT[view.t] ?? view.t };
+        const benefitTarget: VizFilter = { key: "benefit", codes: [view.b], label: blabel(view.b) };
         return (
           <div className="flex flex-wrap gap-2">
             <SelectAsFilter target={harmTarget} onApply={onFilterTable} />
@@ -310,6 +321,21 @@ export const BipartiteMorphMap = ({
           </div>
         );
       })()}
+
+      <p
+        style={{
+          fontSize: 12.5,
+          color: "#5C5C52",
+          lineHeight: 1.55,
+          margin: "16px 0 0",
+        }}
+      >
+        Pathways are recurring sequences of harm mechanisms that our sources describe together,
+        running from an enabling condition or capability, through what is done with it, to a
+        downstream effect on democracy. The visualisation shows each pathway as a chain across the
+        eight tiers, with the number of sources describing each step and the aspects of democracy it
+        affects.
+      </p>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: "14px 20px", marginTop: 14, paddingTop: 12, borderTop: "1px solid #D6D6CA" }}>
         {legendItems.map((item) => {

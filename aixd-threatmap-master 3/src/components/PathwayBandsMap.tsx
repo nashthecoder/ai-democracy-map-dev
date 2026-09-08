@@ -2,9 +2,10 @@
 
 import { SelectAsFilter } from "@/components/SelectAsFilter";
 import { VizPanelCard } from "@/components/VizPanelCard";
-import { HM2_CLUSTERS, HM2_DA_NAME, HM2_DA_PILLAR, HM2_DA_PILLAR_NAME, HM2_L, HM2_PATHS, HM2_TIER_SHORT } from "@/lib/pathways";
+import { HM2_CLUSTERS, HM2_DA_NAME, HM2_DA_PILLAR, HM2_DA_PILLAR_NAME, HM2_PATHS, HM2_TIER_SHORT } from "@/lib/pathways";
 import { TIER_COLORS } from "@/lib/tiers";
-import { mixInk, withAlpha } from "@/lib/codes";
+import { accessibleLabelOf, mixInk, withAlpha } from "@/lib/codes";
+import type { HarmTaxonomy } from "@/lib/types";
 import type { VizFilter } from "@/lib/types";
 import type { ReactNode } from "react";
 import { useState } from "react";
@@ -39,9 +40,10 @@ const HM2B_VLINE_BOTTOM = 462;
 
 const TITLE = "Through which pathways does the literature link AI to harm for democracy?";
 const NOTE =
-  "* the data collected does not include information on which tactics/threats are more effective or grave. Bands are recurring pathways; numbers count entries asserting that step within a single statement — recurring claims in the literature, not verified causation.";
+  "* as mentioned in the sources (the data collected does not include information on which threats and mitigations are more impactful). Bands are recurring pathways; numbers count entries asserting that step within a single statement — recurring claims in the literature, not verified causation.";
 
-const hm2Lbl = (c: string) => HM2_L[c] || HM2_TIER_SHORT[c] || c;
+const hm2Lbl = (c: string, tax?: HarmTaxonomy) =>
+  accessibleLabelOf(c, tax, undefined) ?? HM2_TIER_SHORT[c] ?? c;
 const hm2TierOfPath = (c: string) => {
   const m = /^T(\d+)/.exec(c);
   return m ? "T" + m[1] : null;
@@ -66,11 +68,14 @@ const formatCount = (n: number) => new Intl.NumberFormat("en").format(n);
 
 export const PathwayBandsMap = ({
   onFilterTable,
+  harmTaxonomy,
 }: {
   onFilterTable?: (target: VizFilter) => void;
+  harmTaxonomy?: HarmTaxonomy;
 }) => {
   const [active, setActive] = useState<ReactNode | null>(null);
   const [filterTarget, setFilterTarget] = useState<VizFilter | null>(null);
+  const lbl = (c: string) => hm2Lbl(c, harmTaxonomy);
   // The clicked (filterable) code — highlighted in the diagram + legend.
   const selCode = filterTarget?.codes[0] ?? null;
   const selPillar = filterTarget?.key === "aspect" ? selCode?.[0] ?? null : null;
@@ -192,7 +197,7 @@ export const PathwayBandsMap = ({
                       showDetail(
                         <>
                           <b>
-                            {hm2Lbl(sg.a)} → {hm2Lbl(sg.b)}
+                            {lbl(sg.a)} → {lbl(sg.b)}
                           </b>{" "}
                           — asserted together in <b>{formatCount(sg.n)} entries</b>. Pathway: {f.name}.
                         </>
@@ -205,7 +210,7 @@ export const PathwayBandsMap = ({
                         style={{ cursor: "pointer" }}
                         tabIndex={0}
                         role="button"
-                        aria-label={`${hm2Lbl(sg.a)} to ${hm2Lbl(sg.b)}, ${formatCount(sg.n)} entries`}
+                        aria-label={`${lbl(sg.a)} to ${lbl(sg.b)}, ${formatCount(sg.n)} entries`}
                         onClick={(e) => {
                           e.stopPropagation();
                           activateSeg();
@@ -237,7 +242,7 @@ export const PathwayBandsMap = ({
                     const y = ny[n.c];
                     const col = TIER_COLORS["T" + n.t];
                     const h = Math.min(30, laneH - 5);
-                    const all = wrapWords(hm2Lbl(n.c), 15);
+                    const all = wrapWords(lbl(n.c), 15);
                     const lines = all.slice(0, 2);
                     const trunc = all.length > 2;
                     const activateNode = () => {
@@ -246,12 +251,12 @@ export const PathwayBandsMap = ({
                       setFilterTarget({
                         key: "harm",
                         codes: [n.c],
-                        label: `${hm2Lbl(n.c)} (${n.c})`,
+                        label: lbl(n.c),
                       });
                       showDetail(
                         <>
                           <b>
-                            {hm2Lbl(n.c)} ({n.c})
+                            {lbl(n.c)} ({n.c})
                           </b>{" "}
                           — {t ? HM2_TIER_SHORT[t] : ""}
                           {clusterName ? `, in ${clusterName}.` : "."}
@@ -265,7 +270,7 @@ export const PathwayBandsMap = ({
                         style={{ cursor: "pointer" }}
                         tabIndex={0}
                         role="button"
-                        aria-label={`${hm2Lbl(n.c)} (${n.c})`}
+                        aria-label={`${lbl(n.c)} (${n.c})`}
                         onClick={(e) => {
                           e.stopPropagation();
                           activateNode();
@@ -332,7 +337,7 @@ export const PathwayBandsMap = ({
                       setFilterTarget({
                         key: "aspect",
                         codes: [d[0]],
-                        label: `${d[0]} ${HM2_DA_NAME[d[0]] || d[0]}`,
+                        label: HM2_DA_NAME[d[0]] || d[0],
                       });
                       showDetail(
                         <>

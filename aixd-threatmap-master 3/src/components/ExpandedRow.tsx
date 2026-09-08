@@ -60,19 +60,52 @@ const isSameText = (a?: string | null, b?: string | null) =>
   !!a && !!b && a.trim().replace(/^["']|["']$/g, "") === b.trim().replace(/^["']|["']$/g, "");
 
 export const ExpandedRow = ({ item, aspects, harmTaxonomy, benefitTaxonomy }: ExpandedRowProps) => {
-  const CodeList = ({ title, codes, labelOf }: { title: string; codes: string[]; labelOf: (c: string) => string }) =>
+  const CodeList = ({
+    title,
+    codes,
+    labelOf,
+    categoryOf,
+    descriptionOf,
+  }: {
+    title: string;
+    codes: string[];
+    labelOf: (c: string) => string;
+    categoryOf?: (c: string) => string | null | undefined;
+    descriptionOf?: (c: string) => string | null | undefined;
+  }) =>
     codes.length > 0 ? (
       <div className="min-w-0">
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {title}
         </span>
         <div className="mt-1 flex flex-col gap-1.5">
-          {codes.map((c) => (
-            <span key={c} className="text-sm leading-snug text-foreground/80 break-words">
-              <b className="font-semibold text-foreground">{c}</b>{" "}
-              {labelOf(c)}
-            </span>
-          ))}
+          {codes.map((c) => {
+            const row = (
+              <span className="text-sm leading-snug text-foreground/80 break-words">
+                <b className="font-semibold text-foreground">{c}</b> {labelOf(c)}
+              </span>
+            );
+            if (!categoryOf && !descriptionOf) return row;
+            const category = categoryOf?.(c);
+            const description = descriptionOf?.(c);
+            return (
+              <Tooltip key={c}>
+                <TooltipTrigger render={<span className="inline-flex" />}>{row}</TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs whitespace-normal">
+                  <div className="space-y-1.5">
+                    <div className="flex items-baseline gap-2">
+                      <span className="rounded bg-background/20 px-1 font-mono text-xs font-semibold text-background">
+                        {c}
+                      </span>
+                      <span className="text-xs font-semibold">{labelOf(c)}</span>
+                    </div>
+                    {category && <p className="text-xs text-background/70">{category}</p>}
+                    {description && <p className="text-xs leading-relaxed">{description}</p>}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
         </div>
       </div>
     ) : null;
@@ -184,12 +217,16 @@ export const ExpandedRow = ({ item, aspects, harmTaxonomy, benefitTaxonomy }: Ex
           title="Harm mechanisms"
           codes={item.harmCodes ?? []}
           labelOf={(c) => harmTaxonomy.codes[c]?.label ?? c}
+          categoryOf={(c) => harmTaxonomy.tiers[harmTaxonomy.codes[c]?.tier ?? ""]?.label}
+          descriptionOf={(c) => harmTaxonomy.codes[c]?.description}
         />
 
         <CodeList
-          title="Benefit mechanisms"
+          title="Pro-democracy activities"
           codes={item.benefitCodes ?? []}
           labelOf={(c) => benefitTaxonomy.codes[c]?.label ?? benefitTaxonomy.codes[c]?.name ?? c}
+          categoryOf={(c) => benefitTaxonomy.codes[c]?.name}
+          descriptionOf={(c) => benefitTaxonomy.codes[c]?.description}
         />
 
         <div className="min-w-0">

@@ -153,7 +153,7 @@ export const FilterBar = ({
         </div>
 
         <MultiSelect
-          label="Entry type"
+          label="Type of effect"
           options={[
             { value: "threat-solution", label: "Threat + Mitigation pairing" },
             { value: "threat", label: "Threat" },
@@ -171,13 +171,6 @@ export const FilterBar = ({
         />
 
         <MultiSelect
-          label="Source"
-          options={sourceOptions}
-          selected={filters.source}
-          onChange={(v) => setFilter("source", v)}
-        />
-
-        <MultiSelect
           label="Harm mechanism"
           options={harmOptions}
           selected={filters.harm}
@@ -185,10 +178,18 @@ export const FilterBar = ({
         />
 
         <MultiSelect
-          label="Benefit mechanism"
+          label="Pro-democracy activity"
           options={benefitOptions}
           selected={filters.benefit}
           onChange={(v) => setFilter("benefit", v)}
+        />
+
+        {/* Source last — mirrors the table's final column */}
+        <MultiSelect
+          label="Source"
+          options={sourceOptions}
+          selected={filters.source}
+          onChange={(v) => setFilter("source", v)}
         />
 
         {activeFilterCount > 0 && (

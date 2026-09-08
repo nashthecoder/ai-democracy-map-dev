@@ -69,7 +69,7 @@ const Chip = ({
             codeOnly
               ? "whitespace-nowrap font-mono"
               : compact
-                ? "min-w-0 max-w-[9rem] truncate"
+                ? "min-w-0 max-w-[clamp(2.5rem,18vw,9rem)] truncate"
                 : "whitespace-nowrap"
           }`}
           style={chipStyle}
@@ -77,16 +77,19 @@ const Chip = ({
           {codeOnly ? code : aspect.name}
         </Badge>
       </TooltipTrigger>
-      <TooltipContent className="max-w-xs whitespace-normal">
+      <TooltipContent side="bottom" className="max-w-xs whitespace-normal">
         <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
+          <div className="flex items-baseline gap-2">
             <span className="rounded bg-background/20 px-1 font-mono text-xs font-semibold text-background">
               {aspect.code}
             </span>
-            <span className="text-xs text-background/70">{aspect.pillar}</span>
+            <span className="text-xs font-semibold">{aspect.name}</span>
           </div>
-          {aspect.description && (
-            <p className="text-xs leading-relaxed">{aspect.description}</p>
+          <p className="text-xs text-background/70">{aspect.pillar}</p>
+          {(aspect.definition || aspect.description) && (
+            <p className="text-xs leading-relaxed">
+              {aspect.definition || aspect.description}
+            </p>
           )}
         </div>
       </TooltipContent>

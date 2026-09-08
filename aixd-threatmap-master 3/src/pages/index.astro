@@ -41,10 +41,10 @@ const fontFaceCss = `
     />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href={`${import.meta.env.BASE_URL}/favicon.ico`} />
-    <link rel="icon" type="image/png" sizes="32x32" href={`${import.meta.env.BASE_URL}/favicon-32x32.png`} />
-    <link rel="apple-touch-icon" sizes="180x180" href={`${import.meta.env.BASE_URL}/apple-touch-icon.png`} />
-    <link rel="manifest" href={`${import.meta.env.BASE_URL}/site.webmanifest`} />
+    <link rel="icon" type="image/x-icon" href={`${base}/favicon.ico`} />
+    <link rel="icon" type="image/png" sizes="32x32" href={`${base}/favicon-32x32.png`} />
+    <link rel="apple-touch-icon" sizes="180x180" href={`${base}/apple-touch-icon.png`} />
+    <link rel="manifest" href={`${base}/site.webmanifest`} />
 
     <!-- Open Graph / social preview -->
     <meta property="og:title" content="AI–Democracy Map" />
@@ -54,8 +54,8 @@ const fontFaceCss = `
     <meta name="robots" content="noindex, nofollow" />
 
     <!-- Font preloads (prevent Beatrice flash) -->
-    <link rel="preload" href={`${import.meta.env.BASE_URL}/fonts/Beatrice-Regular.otf`} as="font" type="font/otf" crossorigin />
-    <link rel="preload" href={`${import.meta.env.BASE_URL}/fonts/Beatrice-Bold.otf`} as="font" type="font/otf" crossorigin />
+    <link rel="preload" href={`${base}/fonts/Beatrice-Regular.otf`} as="font" type="font/otf" crossorigin />
+    <link rel="preload" href={`${base}/fonts/Beatrice-Bold.otf`} as="font" type="font/otf" crossorigin />
   </head>
   <body class="min-h-screen bg-background font-sans antialiased">
     <main>

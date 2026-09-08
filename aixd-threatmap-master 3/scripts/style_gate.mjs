@@ -12,8 +12,8 @@
  *    viz panel files: AspectBubbleMap, HarmMechanismMap, PathwayBandsMap.
  *  - Page-level box-shadows (e.g. sticky filterbar) are allowed; the shared
  *    tooltip's warm 8% shadow is allowed by the guardrail.
- *  - The client-mandated heading "The AI–Democracy Landscape: …" is whitelisted
- *    from the "landscape" ban-list check.
+ *  - The feedback email subject line "Feedback from Website - AI Landscape Map"
+ *    is whitelisted from the "landscape" ban-list check.
  *
  * Not every guardrail is automatable (tooltip field order, hover feel). Those
  * live in docs/viz-style-guardrails.md and must be ticked manually per panel.
@@ -38,9 +38,10 @@ const BAN_WORDS = [
 ];
 const BAN_PHRASES = ["discover the", "in today's world", "landscape"];
 
-// Client-required heading — "Landscape" here is the product name, not a buzzword.
+// Client-mandated wording — the feedback email subject line contains
+// "landscape" as the product name, not a buzzword.
 const ALLOWED_TITLE =
-  "The AI–Democracy Landscape: A Map of Threats, Mitigations, and Opportunities";
+  "Feedback from Website - AI Landscape Map";
 
 const VIZ_FILE = /(AspectBubbleMap|HarmMechanismMap|PathwayBandsMap|BipartiteMorphMap)/i;
 const isVizFile = (f) => VIZ_FILE.test(f);
@@ -152,7 +153,7 @@ const RULES = [
     label: "Copy — mandated footnote present",
     scope: "viz",
     fn: (src) =>
-      src.includes("does not include information on which tactics/threats are more effective or grave")
+      src.includes("does not include information on which threats and mitigations are more impactful")
         ? []
         : ["missing mandated footnote text"],
   },

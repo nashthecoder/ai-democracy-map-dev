@@ -44,7 +44,8 @@ export const HM2_HB: HbData = {"edges":[{"t":"T5","b":"B6","n":23},{"t":"T1","b"
 
 import { HM2_L, HM2_TIER_SHORT } from "./pathways";
 import { TIER_COLORS } from "./tiers";
-import { tierOf } from "./codes";
+import { accessibleLabelOf, tierOf } from "./codes";
+import type { BenefitTaxonomy, HarmTaxonomy } from "./types";
 export { tierOf };
 
 export type HbEdge = { t: string; b: string; n: number };
@@ -110,7 +111,13 @@ export const HM2A_NOTE_BASE =
 
 const lt = (c: string) => HM2_HB.tier[c] || [];
 
-export function buildBenefitView(st: BipState): BenefitView {
+export function buildBenefitView(
+  st: BipState,
+  harmTaxonomy?: HarmTaxonomy,
+  benefitTaxonomy?: BenefitTaxonomy
+): BenefitView {
+  const lbl = (c: string) =>
+    accessibleLabelOf(c, harmTaxonomy, benefitTaxonomy) ?? hm2Lbl(c);
   if (st.type === "overview") {
     return {
       headL: "Harm mechanisms",
@@ -127,7 +134,7 @@ export function buildBenefitView(st: BipState): BenefitView {
       })),
       right: HM2_BENS.map((b) => ({
         c: b,
-        label: HM2_BEN_NAME[b],
+        label: lbl(b),
         code: b,
         n: HM2_HB.benQ[b],
         color: HM2_BEN_COLOR[b],
@@ -147,17 +154,17 @@ export function buildBenefitView(st: BipState): BenefitView {
     rows = lt(st.t).map((r) => [r[0], r[1], r[2]]);
     headL = `${HM2_TIER_SHORT[st.t]} (${st.t})`;
     headR = "Pro-democracy activities";
-    note = `Sub-mechanisms of ${st.t} and the activity clusters they are mentioned with. Click an activity to go one level deeper.`;
+    note = "";
   } else if (st.type === "ben") {
     rows = (HM2_HB.ben[st.b] || []).map((r) => [r[0], r[1], r[2]]);
     headL = "Harm mechanisms";
-    headR = `${HM2_BEN_NAME[st.b]} (${st.b})`;
-    note = `Sub-activities of ${st.b} and the harm tiers they are mentioned with. Click a tier to go one level deeper.`;
+    headR = `${lbl(st.b)} (${st.b})`;
+    note = "";
   } else {
     rows = (HM2_HB.pair[st.t + "|" + st.b] || []).map((r) => [r[0], r[1], r[2]]);
     headL = `${HM2_TIER_SHORT[st.t]} (${st.t})`;
-    headR = `${HM2_BEN_NAME[st.b]} (${st.b})`;
-    note = "Individual mechanisms and activities behind this link, with the number of entries mentioning each pair.";
+    headR = `${lbl(st.b)} (${st.b})`;
+    note = "";
   }
   let min = 2;
   let use = rows.filter((r) => r[2] >= min);
@@ -184,7 +191,7 @@ export function buildBenefitView(st: BipState): BenefitView {
     .sort((a, b) => hm2Cmp(hm2HarmKey(a), hm2HarmKey(b)))
     .map((c) => ({
       c,
-      label: hm2Lbl(c),
+      label: lbl(c),
       code: c,
       n: lTot[c],
       color: TIER_COLORS[tierOf(c) ?? ""] || TIER_COLORS[c],
@@ -197,7 +204,7 @@ export function buildBenefitView(st: BipState): BenefitView {
     .sort((a, b) => hm2Cmp(hm2BenKey(a), hm2BenKey(b)))
     .map((c) => ({
       c,
-      label: hm2Lbl(c),
+      label: lbl(c),
       code: c,
       n: rTot[c],
       color: HM2_BEN_COLOR[hm2BenOf(c)],

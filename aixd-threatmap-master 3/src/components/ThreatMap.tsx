@@ -4,8 +4,8 @@ import { AspectBubbleMap } from "@/components/AspectBubbleMap";
 import { BipartiteMorphMap } from "@/components/BipartiteMorphMap";
 import { HarmMechanismMap } from "@/components/HarmMechanismMap";
 import { MapCarousel } from "@/components/MapCarousel";
+import { FloatingFeedback } from "@/components/FloatingFeedback";
 import { PathwayBandsMap } from "@/components/PathwayBandsMap";
-import { QuestionBox } from "@/components/QuestionBox";
 import { AspectDialog } from "@/components/AspectDialog";
 import { DataTable } from "@/components/DataTable";
 import { FilterBar } from "@/components/FilterBar";
@@ -32,6 +32,10 @@ import type { ColumnFiltersState } from "@tanstack/react-table";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+
+// Codes-systems doc link in the carousel title. Placeholder "#" — client is
+// still sourcing the URL ("once we have it from Mrinalini").
+const CODES_SYSTEMS_LINK = "#";
 
 export const ThreatMap = () => {
   const { items, aspects, harmTaxonomy, benefitTaxonomy, isLoading, error } = useDataLoader();
@@ -226,22 +230,38 @@ export const ThreatMap = () => {
       {!isEmbedded && !isLoading && (
         <div className="px-8 pt-10 lg:px-16">
           <p className="p4d-underline-hover mb-4 text-[15.5px] font-bold text-foreground">
-            Explore findings from our initial literature analysis
+            Explore findings from our initial literature analysis{" "}
+            <span className="font-medium text-foreground/70">
+              (click on the icons to explore; for more information on our codes systems and
+              processes,{" "}
+              <a href={CODES_SYSTEMS_LINK} className="underline underline-offset-2 hover:text-foreground">
+                click here
+              </a>
+              )
+            </span>
           </p>
-          <MapCarousel footer={<QuestionBox />}>
+          <p className="mb-4 max-w-[1180px] text-[13px] leading-relaxed text-foreground/60">
+            Explore our map by filtering based on impact type (threat, threat paired with a
+            mitigation strategy, opportunity), aspect of democracy, harms mechanism,
+            pro-democracy activity, and source (from which the entry was extracted).
+            <br />
+            You can copy
+            individual verbatims or download the entire map for better analysis.
+          </p>
+          <MapCarousel>
             <AspectBubbleMap items={items} aspects={aspects} onFilterTable={applyVizFilter} />
             <HarmMechanismMap items={items} harmTaxonomy={harmTaxonomy} onFilterTable={applyVizFilter} />
-            <BipartiteMorphMap onFilterTable={applyVizFilter} />
-            <PathwayBandsMap onFilterTable={applyVizFilter} />
+            <BipartiteMorphMap harmTaxonomy={harmTaxonomy} benefitTaxonomy={benefitTaxonomy} onFilterTable={applyVizFilter} />
+            <PathwayBandsMap harmTaxonomy={harmTaxonomy} onFilterTable={applyVizFilter} />
           </MapCarousel>
           <p className="mt-7 max-w-[1180px] text-[14.5px] leading-[1.65] text-foreground/70">
             Each entry collected from the literature is coded with three categories (codebooks)
             that help analyse the entry: the aspects of democracy it affects, categorisation that
             uses a slightly modified version of an International IDEA framework of democracy; the
-            mechanisms that enable the harm to democracy (used to categorise threats); the activity
-            that brings the benefit to democracy (used to categorise mitigation strategies and
-            opportunities). The latter two codesystems have been developed inductively by the Power
-            for Democracies team, based on the data in this dataset.
+            mechanisms that enable the harm to democracy (used to categorise threats); and the
+            activities that bring the benefit to democracy (used to categorise mitigation
+            strategies and opportunities). The latter two code systems have been developed
+            inductively by Power for Democracies, based on the data in this dataset.
           </p>
         </div>
       )}
@@ -343,7 +363,7 @@ export const ThreatMap = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.85 }}
             transition={{ duration: 0.15 }}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2"
+            className="fixed bottom-20 right-6 z-50 flex items-center gap-2"
           >
             <AnimatePresence>
               {showBackLabel && (
@@ -373,6 +393,8 @@ export const ThreatMap = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <FloatingFeedback />
     </TooltipProvider>
   );
 };

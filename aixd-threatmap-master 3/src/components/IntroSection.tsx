@@ -114,34 +114,20 @@ type StatVariant = "primary" | "secondary" | "tertiary";
 type StatDef = {
   label: string;
   variant: StatVariant;
-  getValue: (items: Item[]) => number;
+  value: number;
 };
 
 // Reading order = grid order: Sources, then Entries (equal-size lead tiles),
 // then Threats / Mitigations mapped stacked in the rightmost column.
+// Client-specified counts (Sep 2026) — hardcoded as requested.
 const STAT_DEFS: StatDef[] = [
+  { label: "Sources", variant: "primary", value: 10 },
+  { label: "Entries", variant: "secondary", value: 204 },
+  { label: "Threats", variant: "tertiary", value: 160 },
   {
-    label: "Sources",
-    variant: "primary",
-    getValue: (items) => new Set(items.map((i) => i.sourceShort)).size,
-  },
-  {
-    label: "Entries",
-    variant: "secondary",
-    getValue: (items) => items.length,
-  },
-  {
-    label: "Threats",
+    label: "Mitigations and opportunities mapped",
     variant: "tertiary",
-    getValue: (items) =>
-      items.filter((i) => i.type === "threat" || i.type === "threat-solution")
-        .length,
-  },
-  {
-    label: "Mitigations mapped",
-    variant: "tertiary",
-    getValue: (items) =>
-      items.filter((i) => i.type === "threat-solution").length,
+    value: 161,
   },
 ];
 
@@ -203,8 +189,15 @@ const StatTile = ({
         background: variant === "tertiary" ? (TERTIARY_TONES[index] ?? styles.tone) : styles.tone,
       }}
     >
-      <div className={`font-bold leading-none tabular-nums ${styles.number}`}>
-        {count}
+      <div className={`relative font-bold leading-none tabular-nums ${styles.number}`}>
+        {/* Invisible spacer of the final value pins the tile to its end-size
+            from mount, so the climbing count (overlaid, absolutely positioned)
+            never changes the number's width and cannot reflow the row — the
+            intro paragraph to the right holds still during the count-up. */}
+        <span className="invisible">{value}</span>
+        <span className="absolute inset-0" aria-hidden="true">
+          {count}
+        </span>
       </div>
       <div
         className={`mt-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${styles.label}`}
@@ -241,14 +234,14 @@ export const IntroSection = ({ items, aspects }: IntroSectionProps) => {
   const stats = STAT_DEFS.map((def, i) => ({
     label: def.label,
     variant: def.variant,
-    value: def.getValue(items),
+    value: def.value,
     index: i,
   }));
 
   return (
     <div className="mb-8">
       <h1 className="mb-6 pt-8 text-2xl font-bold leading-tight text-foreground lg:pt-12 lg:text-3xl">
-        The AI–Democracy Landscape: A Map of Threats, Mitigations, and Opportunities
+        Threats, solutions, and opportunities for democracy in the face of AI
       </h1>
 
       {/* ── Data overview: stat tiles (left) + intro copy (right) — bare on ecru ── */}
@@ -256,12 +249,15 @@ export const IntroSection = ({ items, aspects }: IntroSectionProps) => {
         <DataOverview stats={stats} />
         <div className="flex flex-1 flex-col gap-4 sm:min-w-[320px]">
           <p className="text-base leading-relaxed text-foreground/70">
-            The AI–Democracy Map synthesises threats, proposed mitigation strategies and
-            opportunities for AI to improve democracy. This map is intended for researchers,
-            policymakers, private organisations, civil society and anyone interested in an overview
-            of which areas of democracy are affected by AI-related threats, and which mitigations
-            and opportunities arise from it. Our team reviewed a diverse set of literature and
-            selected ten frameworks systematically mapping AI threats
+            The AI–Democracy Map synthesises threats, proposed mitigation strategies, and
+            opportunities for AI to improve democracy. The map is intended for anyone seeking an
+            overview of which areas of democracy are affected by AI-related threats, and which
+            mitigations and opportunities arise from them
+            {" "}— in particular civil society actors, researchers, and policymakers.
+            <br />
+            Our team
+            reviewed a diverse set of literature and selected ten frameworks that systematically
+            map AI threats
             <Popover>
               <PopoverTrigger className="mx-1 inline-flex size-4 shrink-0 items-center justify-center align-middle rounded-full text-muted-foreground/60 hover:text-muted-foreground cursor-pointer">
                 <Info className="size-4" />
@@ -288,7 +284,7 @@ export const IntroSection = ({ items, aspects }: IntroSectionProps) => {
               </PopoverContent>
             </Popover>
             . This initial selection
-            reflects different disciplinary lenses, levels of abstraction and democratic contexts.
+            reflects different disciplinary lenses, levels of abstraction, and democratic contexts.
           </p>
         </div>
       </div>

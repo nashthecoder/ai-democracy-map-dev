@@ -55,7 +55,7 @@ const COLUMN_INFO: Record<string, { title: string; description: string }> = {
       "The mechanism by which AI enables harm to democracy, coded from the P4D harm taxonomy.",
   },
   solution: {
-    title: "Threat mitigation/ opportunity description",
+    title: "Mitigation/opportunity description",
     description:
       "Proposed measures to address or reduce the identified threat, or the opportunity description for independent opportunities.",
   },
@@ -319,6 +319,8 @@ export const DataTable = ({
             codes={row.original.harmCodes}
             colorOf={(c) => TIER_COLORS[tierOf(c) ?? ""] ?? "#5C5C52"}
             labelOf={(c) => harmTaxonomy.codes[c]?.label ?? c}
+            categoryOf={(c) => harmTaxonomy.tiers[harmTaxonomy.codes[c]?.tier ?? ""]?.label}
+            descriptionOf={(c) => harmTaxonomy.codes[c]?.description}
           />
         ),
         filterFn: (row, _columnId, filterValue: string[]) => {
@@ -357,6 +359,8 @@ export const DataTable = ({
             codes={row.original.benefitCodes}
             colorOf={(c) => BENEFIT_CLUSTER_COLORS[benefitClusterOf(c, benefitTaxonomy)] ?? "#5C5C52"}
             labelOf={(c) => benefitTaxonomy.codes[c]?.label ?? benefitTaxonomy.codes[c]?.name ?? c}
+            categoryOf={(c) => benefitTaxonomy.codes[c]?.name}
+            descriptionOf={(c) => benefitTaxonomy.codes[c]?.description}
           />
         ),
         filterFn: (row, _columnId, filterValue: string[]) => {
@@ -594,9 +598,10 @@ export const DataTable = ({
                               ) : cell.column.id === "aspects" ? (
                                 <div className="flex min-h-19 items-center py-2">
                                   {/* Full names once the column is wide enough (xl); on
-                                      narrower widths the column can't hold a name, so
-                                      show the codes ("3.2") instead — full name is on
-                                      hover and in the expanded row. */}
+                                      narrower widths show the beginning of the name,
+                                      truncating with an ellipsis as the window shrinks
+                                      (so it's obvious a wider screen reveals more) — the
+                                      full name is on hover and in the expanded row. */}
                                   <div
                                     className="hidden overflow-hidden xl:flex xl:items-center"
                                     style={{
@@ -615,8 +620,8 @@ export const DataTable = ({
                                     <AspectChips
                                       codes={orderAspects(row.original.aspects)}
                                       aspects={aspects}
-                                      maxVisible={6}
-                                      codeOnly
+                                      maxVisible={3}
+                                      compact
                                     />
                                   </div>
                                 </div>

@@ -1,11 +1,20 @@
 "use client";
 
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import { mixInk, withAlpha } from "@/lib/codes";
 
 type CodeChipsProps = {
   codes: string[];
   colorOf: (code: string) => string | undefined;
   labelOf: (code: string) => string;
+  // Head category of the code (harm tier / pro-dem cluster). When provided
+  // alongside descriptionOf, chips gain a hover box: name → category → description.
+  categoryOf?: (code: string) => string | null | undefined;
+  descriptionOf?: (code: string) => string | null | undefined;
   max?: number;
   maxWidth?: number;
   emptyLabel?: string;
@@ -15,6 +24,8 @@ export const CodeChips = ({
   codes,
   colorOf,
   labelOf,
+  categoryOf,
+  descriptionOf,
   max = 3,
   maxWidth = 150,
   emptyLabel = "—",
@@ -28,15 +39,18 @@ export const CodeChips = ({
   }
   const shown = codes.slice(0, max);
   const extra = codes.length - shown.length;
+  const hasHover = !!(categoryOf || descriptionOf);
   return (
     <div className="flex flex-wrap gap-1">
       {shown.map((code) => {
         const c = colorOf(code) ?? "#5C5C52";
         const name = labelOf(code);
-        return (
+        const category = categoryOf?.(code);
+        const description = descriptionOf?.(code);
+        const chip = (
           <span
             key={code}
-            title={name && name !== code ? `${code} — ${name}` : code}
+            title={hasHover ? undefined : name && name !== code ? `${code} — ${name}` : code}
             // Wraps onto a second line instead of truncating with an
             // ellipsis — maxWidth now bounds the wrap, not a hard cut.
             className="inline-block whitespace-normal break-words rounded-[10px] px-[7px] py-[3px] text-[10.5px] font-semibold leading-snug"
@@ -49,6 +63,24 @@ export const CodeChips = ({
           >
             {name || code}
           </span>
+        );
+        if (!hasHover) return chip;
+        return (
+          <Tooltip key={code}>
+            <TooltipTrigger render={<span className="inline-flex" />}>{chip}</TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-xs whitespace-normal">
+              <div className="space-y-1.5">
+                <div className="flex items-baseline gap-2">
+                  <span className="rounded bg-background/20 px-1 font-mono text-xs font-semibold text-background">
+                    {code}
+                  </span>
+                  <span className="text-xs font-semibold">{name}</span>
+                </div>
+                {category && <p className="text-xs text-background/70">{category}</p>}
+                {description && <p className="text-xs leading-relaxed">{description}</p>}
+              </div>
+            </TooltipContent>
+          </Tooltip>
         );
       })}
       {extra > 0 && (

@@ -43,7 +43,7 @@ const TIER_SHORT: Record<string, string> = {
 const MIN_VISIBLE_WEIGHT = 3;
 
 const TITLE = "Which mechanisms are more frequently involved in harming democracy?";
-const NOTE = "* the data collected does not include information on which tactics/threats are more effective or grave";
+const NOTE = "* as mentioned in the sources (the data collected does not include information on which threats and mitigations are more impactful)";
 
 function wrapLabelLines(text: string, maxChars = 16, maxLines = 2): string[] {
   const words = (text || "").split(" ");
@@ -240,7 +240,7 @@ export const HarmMechanismMap = ({
     () =>
       TIER_ORDER.map((tier) => ({
         color: TIER_COLORS[tier],
-        label: `${TIER_CODE[tier as keyof typeof TIER_CODE]} — ${TIER_SHORT[tier]}`,
+        label: TIER_SHORT[tier],
         codes: (harmTaxonomy.tiers[tier]?.codeIds ?? [])
           .filter((c) => harmTaxonomy.codes[c])
           .map((c) => c),
@@ -382,7 +382,20 @@ export const HarmMechanismMap = ({
           />
         )}
       </div>
-      <VizLegend groups={legendGroups} activeCode={activeId} />
+      <p
+        style={{
+          fontSize: 12.5,
+          color: "#5C5C52",
+          lineHeight: 1.55,
+          margin: "16px 0 0",
+        }}
+      >
+        The harm mechanisms are arranged in eight tiers by causal depth, running from the conditions
+        under which AI systems are built and released (T0), through their capabilities (T1–T2),
+        outputs and deployment (T4–T5), to the ways they are used and the cumulative effects on
+        individuals and society (T6–T7).
+      </p>
+      <VizLegend groups={legendGroups} activeCode={activeId} showCodes={false} />
       {pinnedId && onFilterTable && (() => {
         const target: VizFilter = {
           key: "harm",
