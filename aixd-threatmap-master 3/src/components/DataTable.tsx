@@ -305,7 +305,7 @@ export const DataTable = ({
           // paraphrase itself if no verbatim exists). The row is always just
           // the compact summary, so expanding never reflows it.
           return (
-            <span className="line-clamp-3 text-[13px] leading-[1.45]">
+            <span className="line-clamp-3 text-[13px] leading-[1.45] [overflow-wrap:anywhere]">
               {row.original.description}
             </span>
           );
@@ -334,14 +334,14 @@ export const DataTable = ({
         cell: ({ row }) => {
           if (row.original.type === "independent-opportunity") {
             return (
-              <span className="line-clamp-3 text-[13px] leading-[1.45]">
+              <span className="line-clamp-3 text-[13px] leading-[1.45] [overflow-wrap:anywhere]">
                 {row.original.description}
               </span>
             );
           }
           const hasSolution = !!row.original.solution;
           return hasSolution ? (
-            <span className="line-clamp-3 text-[13px] leading-[1.45]">
+            <span className="line-clamp-3 text-[13px] leading-[1.45] [overflow-wrap:anywhere]">
               {row.original.solution}
             </span>
           ) : (
@@ -616,18 +616,23 @@ export const DataTable = ({
                                       fadeWidth={40}
                                     />
                                   </div>
-                                  <div className="flex flex-wrap items-center xl:hidden">
+                                  <div className="flex min-w-0 flex-wrap items-center xl:hidden [&_*]:min-w-0 [&>*]:min-w-0">
+                                    {/* Below xl the column is only ~50-70px wide — too
+                                        narrow for full names at any padding. codeOnly
+                                        keeps each pill to its short code ("2.1"), which
+                                        actually fits; full name + pillar + description
+                                        stay one hover away in the tooltip. */}
                                     <AspectChips
                                       codes={orderAspects(row.original.aspects)}
                                       aspects={aspects}
                                       maxVisible={3}
-                                      compact
+                                      codeOnly
                                     />
                                   </div>
                                 </div>
                               ) : cell.column.id === "description" ||
                                 cell.column.id === "solution" ? (
-                                <div className="flex min-h-19 items-center py-3">
+                                <div className="flex min-h-19 min-w-0 items-center py-3">
                                   {flexRender(
                                     cell.column.columnDef.cell,
                                     cell.getContext()

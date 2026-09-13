@@ -22,7 +22,11 @@ from typing import Optional
 import openpyxl
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-INPUT_XLSX = PROJECT_ROOT / "docs" / "20260828_Updated data + new labels + new descriptions.xlsx"
+# 2026-09-14: client sent a dataset refresh (citations homogenised — same IDs,
+# codes, and text; only the Source column changed) as a standalone workbook
+# with just the DATASET sheet. The codebook taxonomy is untouched and still
+# comes from the original workbook (see generate_taxonomy.py's INPUT_XLSX).
+INPUT_XLSX = PROJECT_ROOT / "docs" / "20260911_Updated data.xlsx"
 DATASET_SHEET = "DATASET V 10.3"
 INPUT_CSV = PROJECT_ROOT / "data" / "raw" / "latest.csv"
 OUTPUT_JSON = PROJECT_ROOT / "public" / "data" / "data.json"

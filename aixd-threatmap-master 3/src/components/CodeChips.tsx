@@ -16,7 +16,10 @@ type CodeChipsProps = {
   categoryOf?: (code: string) => string | null | undefined;
   descriptionOf?: (code: string) => string | null | undefined;
   max?: number;
-  maxWidth?: number;
+  // Bound each chip to the cell it lives in ("100%" = the column's content
+  // width) so a chip never paints over a neighbouring column. A number keeps
+  // the old fixed-pixel behaviour for full-width usages.
+  maxWidth?: number | string;
   emptyLabel?: string;
 };
 
@@ -27,7 +30,7 @@ export const CodeChips = ({
   categoryOf,
   descriptionOf,
   max = 3,
-  maxWidth = 150,
+  maxWidth = "100%",
   emptyLabel = "—",
 }: CodeChipsProps) => {
   if (!codes || codes.length === 0) {
@@ -41,7 +44,7 @@ export const CodeChips = ({
   const extra = codes.length - shown.length;
   const hasHover = !!(categoryOf || descriptionOf);
   return (
-    <div className="flex flex-wrap gap-1">
+    <div className="flex min-w-0 flex-wrap gap-1">
       {shown.map((code) => {
         const c = colorOf(code) ?? "#5C5C52";
         const name = labelOf(code);
@@ -67,7 +70,7 @@ export const CodeChips = ({
         if (!hasHover) return chip;
         return (
           <Tooltip key={code}>
-            <TooltipTrigger render={<span className="inline-flex" />}>{chip}</TooltipTrigger>
+            <TooltipTrigger render={<span className="inline-flex max-w-full" />}>{chip}</TooltipTrigger>
             <TooltipContent side="bottom" className="max-w-xs whitespace-normal">
               <div className="space-y-1.5">
                 <div className="flex items-baseline gap-2">

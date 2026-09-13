@@ -6,6 +6,7 @@ import { VizTooltip } from "@/components/VizTooltip";
 import { SelectAsFilter } from "@/components/SelectAsFilter";
 import type { HarmTaxonomy, Item, VizFilter } from "@/lib/types";
 import { withAlpha } from "@/lib/codes";
+import { HARM_TIER_DESC } from "@/lib/legendInfo";
 import { forceCollide, forceLink, forceManyBody, forceSimulation, forceY } from "d3";
 import { useMemo, useRef, useState } from "react";
 
@@ -238,13 +239,16 @@ export const HarmMechanismMap = ({
 
   const legendGroups = useMemo(
     () =>
-      TIER_ORDER.map((tier) => ({
-        color: TIER_COLORS[tier],
-        label: TIER_SHORT[tier],
-        codes: (harmTaxonomy.tiers[tier]?.codeIds ?? [])
-          .filter((c) => harmTaxonomy.codes[c])
-          .map((c) => c),
-      })),
+      TIER_ORDER.map((tier) => {
+        const tierCodes = (harmTaxonomy.tiers[tier]?.codeIds ?? []).filter((c) => harmTaxonomy.codes[c]);
+        return {
+          color: TIER_COLORS[tier],
+          label: TIER_SHORT[tier],
+          codes: tierCodes,
+          description: HARM_TIER_DESC[tier],
+          subNames: tierCodes.map((c) => harmTaxonomy.codes[c].label).filter(Boolean),
+        };
+      }),
     [harmTaxonomy]
   );
 

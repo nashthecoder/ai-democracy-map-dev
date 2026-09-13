@@ -6,6 +6,7 @@ import { VizPanelCard } from "@/components/VizPanelCard";
 import { VizTooltip } from "@/components/VizTooltip";
 import type { AspectMap, Item, VizFilter } from "@/lib/types";
 import { withAlpha } from "@/lib/codes";
+import { ASPECT_PILLAR_DESC } from "@/lib/legendInfo";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { forceCollide, forceManyBody, forceSimulation, forceX, forceY } from "d3";
 
@@ -95,7 +96,7 @@ function wrapLabelLines(text: string, maxChars = 16, maxLines = 2): string[] {
 
 const formatCount = (n: number) => new Intl.NumberFormat("en").format(n);
 
-type LegendGroup = { color: string; label: string; codes: string[] };
+type LegendGroup = { color: string; label: string; codes: string[]; description?: string; subNames?: string[] };
 
 type AspectBubbleMapProps = {
   items: Item[];
@@ -194,13 +195,16 @@ export const AspectBubbleMap = ({ items, aspects, onFilterTable }: AspectBubbleM
 
   const legendGroups = useMemo<LegendGroup[]>(
     () =>
-      ["1", "2", "3", "4"].map((p) => ({
-        color: PILLAR_COLORS[p],
-        label: PILLAR_LABELS[p],
-        codes: Object.values(aspects)
-          .filter((a) => a.pillarCode === p)
-          .map((a) => a.code),
-      })),
+      ["1", "2", "3", "4"].map((p) => {
+        const pillarAspects = Object.values(aspects).filter((a) => a.pillarCode === p);
+        return {
+          color: PILLAR_COLORS[p],
+          label: PILLAR_LABELS[p],
+          codes: pillarAspects.map((a) => a.code),
+          description: ASPECT_PILLAR_DESC[p],
+          subNames: pillarAspects.map((a) => a.name),
+        };
+      }),
     [aspects]
   );
 

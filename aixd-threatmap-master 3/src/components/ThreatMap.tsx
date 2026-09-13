@@ -33,10 +33,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
-// Codes-systems doc link in the carousel title. Placeholder "#" — client is
-// still sourcing the URL ("once we have it from Mrinalini").
-const CODES_SYSTEMS_LINK = "#";
-
 export const ThreatMap = () => {
   const { items, aspects, harmTaxonomy, benefitTaxonomy, isLoading, error } = useDataLoader();
   const { filters, setFilter, resetFilters, activeFilterCount } = useFilters();
@@ -90,17 +86,17 @@ export const ThreatMap = () => {
     [harmTaxonomy, benefitTaxonomy]
   );
 
-  // A map click only *suggests* a filter (the panel shows an "Apply filter: …"
-  // button). This applies it: union the suggestion's expanded codes onto
-  // whatever is already filtered for that category, then jump to the table.
+  // A map click only *suggests* a filter (the panel shows an "Apply filter …"
+  // button). This applies it: the newest carousel suggestion *replaces* any
+  // earlier carousel-applied filter for that category (previous suggestions no
+  // longer union in), while other categories (search, type, aspect, source)
+  // are left untouched. Then it jumps to the table.
   const applyVizFilter = useCallback(
     (target: VizFilter) => {
-      const next = new Set<string>(filters[target.key]);
-      for (const code of expandCodes(target.key, target.codes)) next.add(code);
-      setFilter(target.key, [...next]);
+      setFilter(target.key, expandCodes(target.key, target.codes));
       cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     },
-    [filters, setFilter, expandCodes]
+    [setFilter, expandCodes]
   );
 
   const handleExport = useCallback(() => {
@@ -232,21 +228,20 @@ export const ThreatMap = () => {
           <p className="p4d-underline-hover mb-4 text-[15.5px] font-bold text-foreground">
             Explore findings from our initial literature analysis{" "}
             <span className="font-medium text-foreground/70">
-              (click on the icons to explore; for more information on our codes systems and
-              processes,{" "}
-              <a href={CODES_SYSTEMS_LINK} className="underline underline-offset-2 hover:text-foreground">
-                click here
-              </a>
-              )
+              (click on the icons to explore)
             </span>
+            {/* "for more information on our codes systems and processes, click
+                here" — pulled per client request (2026-09-14) until the link
+                target is ready; follow-up expected from Mrinalini. */}
           </p>
           <p className="mb-4 max-w-[1180px] text-[13px] leading-relaxed text-foreground/60">
-            Explore our map by filtering based on impact type (threat, threat paired with a
-            mitigation strategy, opportunity), aspect of democracy, harms mechanism,
-            pro-democracy activity, and source (from which the entry was extracted).
-            <br />
-            You can copy
-            individual verbatims or download the entire map for better analysis.
+            Each entry collected from the literature is coded with three categories (codebooks)
+            that help analyse the entry: the aspects of democracy it affects, categorisation that
+            uses a slightly modified version of an International IDEA framework of democracy; the
+            mechanisms that enable the harm to democracy (used to categorise threats); and the
+            activities that bring the benefit to democracy (used to categorise mitigation
+            strategies and opportunities). The latter two code systems have been developed
+            inductively by Power for Democracies, based on the data in this dataset.
           </p>
           <MapCarousel>
             <AspectBubbleMap items={items} aspects={aspects} onFilterTable={applyVizFilter} />
@@ -255,13 +250,12 @@ export const ThreatMap = () => {
             <PathwayBandsMap harmTaxonomy={harmTaxonomy} onFilterTable={applyVizFilter} />
           </MapCarousel>
           <p className="mt-7 max-w-[1180px] text-[14.5px] leading-[1.65] text-foreground/70">
-            Each entry collected from the literature is coded with three categories (codebooks)
-            that help analyse the entry: the aspects of democracy it affects, categorisation that
-            uses a slightly modified version of an International IDEA framework of democracy; the
-            mechanisms that enable the harm to democracy (used to categorise threats); and the
-            activities that bring the benefit to democracy (used to categorise mitigation
-            strategies and opportunities). The latter two code systems have been developed
-            inductively by Power for Democracies, based on the data in this dataset.
+            Explore our map by filtering based on impact type (threat, threat paired with a
+            mitigation strategy, opportunity), aspect of democracy, harms mechanism,
+            pro-democracy activity, and source (from which the entry was extracted).
+            <br />
+            You can copy
+            individual verbatims or download the entire map for better analysis.
           </p>
         </div>
       )}

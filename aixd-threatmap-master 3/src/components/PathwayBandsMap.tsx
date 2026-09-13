@@ -2,8 +2,10 @@
 
 import { SelectAsFilter } from "@/components/SelectAsFilter";
 import { VizPanelCard } from "@/components/VizPanelCard";
+import { useLegendTip } from "@/components/LegendTip";
 import { HM2_CLUSTERS, HM2_DA_NAME, HM2_DA_PILLAR, HM2_DA_PILLAR_NAME, HM2_PATHS, HM2_TIER_SHORT } from "@/lib/pathways";
 import { TIER_COLORS } from "@/lib/tiers";
+import { PATHWAY_CLUSTER_DESC, tierKeyOf } from "@/lib/legendInfo";
 import { accessibleLabelOf, mixInk, withAlpha } from "@/lib/codes";
 import type { HarmTaxonomy } from "@/lib/types";
 import type { VizFilter } from "@/lib/types";
@@ -75,6 +77,22 @@ export const PathwayBandsMap = ({
 }) => {
   const [active, setActive] = useState<ReactNode | null>(null);
   const [filterTarget, setFilterTarget] = useState<VizFilter | null>(null);
+  const { tipNode, open } = useLegendTip();
+  const openClusterTip = (name: string, tiers: string[], rect: DOMRect) =>
+    open(
+      {
+        title: name,
+        description: PATHWAY_CLUSTER_DESC[name],
+        lines: tiers
+          .flatMap((t) =>
+            (harmTaxonomy?.tiers[tierKeyOf(t)]?.codeIds ?? [])
+              .filter((code) => harmTaxonomy?.codes[code])
+              .map((code) => harmTaxonomy?.codes[code]?.label)
+          )
+          .filter((x): x is string => !!x),
+      },
+      rect
+    );
   const lbl = (c: string) => hm2Lbl(c, harmTaxonomy);
   // The clicked (filterable) code — highlighted in the diagram + legend.
   const selCode = filterTarget?.codes[0] ?? null;
@@ -112,16 +130,53 @@ export const PathwayBandsMap = ({
                   {ci > 0 && (
                     <line x1={cx[0] - 4} y1={6} x2={cx[0] - 4} y2={HM2B_VLINE_BOTTOM} stroke="#D6D6CA" strokeWidth={1} />
                   )}
+                  {/* Invisible hover target for the cluster's "head category"
+                      hover box (short description + sub-codes), matching the
+                      hover boxes added to the other panels' legends. */}
+                  <rect
+                    x={cx[0] - 8}
+                    y={4}
+                    width={cx[1] - cx[0] + 16}
+                    height={HM2B_TITLE_Y2 + 12}
+                    fill="#1a1a17"
+                    fillOpacity={0}
+                    style={{ cursor: "help" }}
+                    onMouseEnter={(e) => openClusterTip(c.name, c.tiers, e.currentTarget.getBoundingClientRect())}
+                  />
                   {nameLines.length === 1 ? (
-                    <text x={mid} y={HM2B_TITLE_Y2} textAnchor="middle" fontSize={11.5} fontWeight={800} fill="#1a1a17">
+                    <text
+                      x={mid}
+                      y={HM2B_TITLE_Y2}
+                      textAnchor="middle"
+                      fontSize={11.5}
+                      fontWeight={800}
+                      fill="#1a1a17"
+                      style={{ pointerEvents: "none" }}
+                    >
                       {nameLines[0]}
                     </text>
                   ) : (
                     <>
-                      <text x={mid} y={HM2B_TITLE_Y1} textAnchor="middle" fontSize={11.5} fontWeight={800} fill="#1a1a17">
+                      <text
+                        x={mid}
+                        y={HM2B_TITLE_Y1}
+                        textAnchor="middle"
+                        fontSize={11.5}
+                        fontWeight={800}
+                        fill="#1a1a17"
+                        style={{ pointerEvents: "none" }}
+                      >
                         {nameLines[0]}
                       </text>
-                      <text x={mid} y={HM2B_TITLE_Y2} textAnchor="middle" fontSize={11.5} fontWeight={800} fill="#1a1a17">
+                      <text
+                        x={mid}
+                        y={HM2B_TITLE_Y2}
+                        textAnchor="middle"
+                        fontSize={11.5}
+                        fontWeight={800}
+                        fill="#1a1a17"
+                        style={{ pointerEvents: "none" }}
+                      >
                         {nameLines[1]}
                       </text>
                     </>
@@ -473,6 +528,7 @@ export const PathwayBandsMap = ({
           );
         })}
       </div>
+      {tipNode}
     </VizPanelCard>
   );
 };

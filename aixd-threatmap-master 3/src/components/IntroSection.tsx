@@ -241,7 +241,7 @@ export const IntroSection = ({ items, aspects }: IntroSectionProps) => {
   return (
     <div className="mb-8">
       <h1 className="mb-6 pt-8 text-2xl font-bold leading-tight text-foreground lg:pt-12 lg:text-3xl">
-        Threats, solutions, and opportunities for democracy in the face of AI
+        Threats, solutions, and opportunities for democracy in the face of AI V2.0
       </h1>
 
       {/* ── Data overview: stat tiles (left) + intro copy (right) — bare on ecru ── */}

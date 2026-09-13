@@ -125,7 +125,7 @@ export const FilterBar = ({
     for (const c of filters.benefit) {
       result.push({
         key: `benefit:${c}`,
-        label: `Benefit: ${benefitTaxonomy.codes[c]?.label ?? benefitTaxonomy.codes[c]?.name ?? c}`,
+        label: `Pro-dem activity: ${benefitTaxonomy.codes[c]?.label ?? benefitTaxonomy.codes[c]?.name ?? c}`,
         onRemove: () => setFilter("benefit", filters.benefit.filter((v) => v !== c)),
       });
     }
@@ -178,7 +178,7 @@ export const FilterBar = ({
         />
 
         <MultiSelect
-          label="Pro-democracy activity"
+          label="Pro-dem activity"
           options={benefitOptions}
           selected={filters.benefit}
           onChange={(v) => setFilter("benefit", v)}

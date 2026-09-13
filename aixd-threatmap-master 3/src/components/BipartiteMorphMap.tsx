@@ -3,6 +3,7 @@
 import { SelectAsFilter } from "@/components/SelectAsFilter";
 import { VizPanelCard } from "@/components/VizPanelCard";
 import { VizZoomControls } from "@/components/VizZoomControls";
+import { useLegendTip } from "@/components/LegendTip";
 import {
   buildBenefitView,
   HM2_BEN_COLOR,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/bipartite";
 import { HM2_TIER_SHORT } from "@/lib/pathways";
 import { TIER_COLORS } from "@/lib/tiers";
+import { HARM_TIER_DESC, tierKeyOf } from "@/lib/legendInfo";
 import { useSvgPanZoom } from "@/lib/useSvgPanZoom";
 import { accessibleLabelOf, mixInk, withAlpha } from "@/lib/codes";
 import type { BenefitTaxonomy, HarmTaxonomy } from "@/lib/types";
@@ -77,6 +79,7 @@ export const BipartiteMorphMap = ({
 }) => {
   const [view, setView] = useState<BipState>({ type: "overview" });
   const pz = useSvgPanZoom(0.5, 4);
+  const { tipNode, open, close } = useLegendTip();
 
   const v = useMemo(
     () => buildBenefitView(view, harmTaxonomy, benefitTaxonomy),
@@ -107,7 +110,11 @@ export const BipartiteMorphMap = ({
       const all = wrapWords(d.label, h >= 20 ? 24 : 30);
       const lines = all.slice(0, h >= 20 ? 2 : 1);
       const trunc = all.length > lines.length;
-      const tx = x + 9 + d.code.length * 5.6 + 8;
+      // Pro-democracy activity boxes (B-codes) drop the code label per client
+      // request — only the harm-tier boxes (T-codes) keep theirs. The name
+      // text shifts left to fill the gap where the code used to sit.
+      const isActivity = d.code.startsWith("B");
+      const tx = isActivity ? x + 9 : x + 9 + d.code.length * 5.6 + 8;
       const ink = mixInk(d.color, 0.25);
       const activate = () => {
         if (d.act === "tier") changeView({ type: "tier", t: d.t ?? d.c });
@@ -137,9 +144,11 @@ export const BipartiteMorphMap = ({
           }}
         >
           <rect x={x} y={y - h / 2} width={w} height={h} rx={9} fill={withAlpha(d.color, 0.16)} stroke={withAlpha(d.color, 0.55)} strokeWidth={1.5} />
-          <text x={x + 9} y={y} dominantBaseline="central" fontSize={10} fontWeight={800} fill={ink}>
-            {d.code}
-          </text>
+          {!isActivity && (
+            <text x={x + 9} y={y} dominantBaseline="central" fontSize={10} fontWeight={800} fill={ink}>
+              {d.code}
+            </text>
+          )}
           {lines.length === 1 ? (
             <text x={tx} y={y} dominantBaseline="central" fontSize={10} fontWeight={600} fill={ink}>
               {lines[0]}
@@ -196,9 +205,14 @@ export const BipartiteMorphMap = ({
           }}
         >
           <path d={`M${x1} ${y1} C ${x1 + 80} ${y1}, ${x2 - 80} ${y2}, ${x2} ${y2}`} fill="none" stroke={k.color} strokeWidth={(0.7 + k.n * 0.3).toFixed(1)} opacity={0.4} />
-          <text x={mx} y={my - 4} textAnchor="middle" fontSize={10} fontWeight={700} fill="#22201a" stroke="#ffffff" strokeWidth={2.5} paintOrder="stroke">
-            {fmt(k.n)}
-          </text>
+          {/* Mention-count label: only in a drill-down view (clicked into a
+              connection) — the overview has too many crossing links for the
+              numbers to read cleanly, so they're suppressed there. */}
+          {view.type !== "overview" && (
+            <text x={mx} y={my - 4} textAnchor="middle" fontSize={10} fontWeight={700} fill="#22201a" stroke="#ffffff" strokeWidth={2.5} paintOrder="stroke">
+              {fmt(k.n)}
+            </text>
+          )}
         </g>
       );
     });
@@ -233,17 +247,33 @@ export const BipartiteMorphMap = ({
       const k = hm2BenOf(d.c);
       (codesR[k] = codesR[k] || []).push(d.c);
     });
-    const items: { key: string; color: string; label: string; sub: string }[] = [];
+    const items: { key: string; color: string; label: string; sub: string; description?: string; lines?: string[] }[] = [];
     tiersShown.forEach((t) => {
       const sub = (codesL[t] || []).filter((c) => c !== t);
-      items.push({ key: "t-" + t, color: TIER_COLORS[t], label: `${t} — ${HM2_TIER_SHORT[t]}`, sub: sub.join(", ") });
+      const tierCodes = (harmTaxonomy?.tiers[tierKeyOf(t)]?.codeIds ?? []).filter((c) => harmTaxonomy?.codes[c]);
+      items.push({
+        key: "t-" + t,
+        color: TIER_COLORS[t],
+        label: `${t} — ${HM2_TIER_SHORT[t]}`,
+        sub: sub.join(", "),
+        description: HARM_TIER_DESC[tierKeyOf(t)],
+        lines: tierCodes.map((c) => harmTaxonomy?.codes[c]?.label).filter((x): x is string => !!x),
+      });
     });
     bensShown.forEach((b) => {
       const sub = (codesR[b] || []).filter((c) => c !== b);
-      items.push({ key: "b-" + b, color: HM2_BEN_COLOR[b], label: `${b} ${blabel(b)}`, sub: sub.join(", ") });
+      const groupCodes = (benefitTaxonomy?.groups[b]?.codeIds ?? []).filter((c) => benefitTaxonomy?.codes[c]);
+      items.push({
+        key: "b-" + b,
+        color: HM2_BEN_COLOR[b],
+        label: `${b} ${blabel(b)}`,
+        sub: sub.join(", "),
+        description: benefitTaxonomy?.codes[b]?.description,
+        lines: groupCodes.map((c) => benefitTaxonomy?.codes[c]?.label ?? benefitTaxonomy?.codes[c]?.name).filter((x): x is string => !!x),
+      });
     });
     return items;
-  }, [v]);
+  }, [v, harmTaxonomy, benefitTaxonomy]);
 
   return (
     <VizPanelCard
@@ -337,17 +367,51 @@ export const BipartiteMorphMap = ({
         affects.
       </p>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "14px 20px", marginTop: 14, paddingTop: 12, borderTop: "1px solid #D6D6CA" }}>
-        {legendItems.map((item) => {
+      {(() => {
+        // Split into two labeled sections (harm tiers / pro-democracy
+        // activities) instead of one flat wrapped row, so the reader can see
+        // where one group ends and the other begins — matches the
+        // "Democracy aspects" header pattern used by the Pathways panel.
+        const tierItems = legendItems.filter((i) => i.key.startsWith("t-"));
+        const benItems = legendItems.filter((i) => i.key.startsWith("b-"));
+
+        const renderLegendItem = (item: (typeof legendItems)[number]) => {
           // The active drill-down view (tier / benefit / edge) tints its
           // matching legend row so the reader sees what's filterable.
           const isActive =
             (view.type === "tier" && item.key === `t-${view.t}`) ||
             (view.type === "ben" && item.key === `b-${view.b}`) ||
             (view.type === "edge" && (item.key === `t-${view.t}` || item.key === `b-${view.b}`));
+          const actionable = !!item.description || (item.lines ?? []).length > 0;
           return (
             <div
               key={item.key}
+              tabIndex={actionable ? 0 : undefined}
+              role={actionable ? "button" : undefined}
+              aria-label={
+                actionable
+                  ? `${item.label} — ${item.description ?? "Sub-codes"}`
+                  : undefined
+              }
+              onMouseEnter={
+                actionable
+                  ? (e) =>
+                      open(
+                        { title: item.label, description: item.description, lines: item.lines },
+                        e.currentTarget.getBoundingClientRect()
+                      )
+                  : undefined
+              }
+              onFocus={
+                actionable
+                  ? (e) =>
+                      open(
+                        { title: item.label, description: item.description, lines: item.lines },
+                        e.currentTarget.getBoundingClientRect()
+                      )
+                  : undefined
+              }
+              onBlur={actionable ? close : undefined}
               style={{
                 fontSize: 10.5,
                 color: "#5C5C52",
@@ -356,6 +420,7 @@ export const BipartiteMorphMap = ({
                 borderRadius: 8,
                 padding: "4px 8px",
                 margin: "-4px -8px",
+                cursor: actionable ? "help" : "default",
                 background: isActive ? withAlpha(item.color, 0.16) : "transparent",
                 outline: isActive ? `1px solid ${withAlpha(item.color, 0.5)}` : "none",
                 outlineOffset: "-1px",
@@ -369,8 +434,38 @@ export const BipartiteMorphMap = ({
               {item.sub && <div>{item.sub}</div>}
             </div>
           );
-        })}
-      </div>
+        };
+
+        const sectionHeader = (label: string) => (
+          <span
+            style={{
+              fontSize: 10.5,
+              fontWeight: 800,
+              color: "#1a1a17",
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+            }}
+          >
+            {label}
+          </span>
+        );
+
+        return (
+          <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid #D6D6CA" }}>
+            {sectionHeader("Harm tiers")}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "14px 20px", marginTop: 6 }}>
+              {tierItems.map(renderLegendItem)}
+            </div>
+            <div style={{ marginTop: 14 }}>
+              {sectionHeader("Pro-democracy activities")}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "14px 20px", marginTop: 6 }}>
+                {benItems.map(renderLegendItem)}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+      {tipNode}
     </VizPanelCard>
   );
 };

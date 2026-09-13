@@ -15,7 +15,8 @@ type AspectChipsProps = {
   codes: string[];
   aspects: AspectMap;
   maxVisible?: number;
-  // Compact mode: chips truncate long names with "..." — used in table cells
+  // Compact mode: chips are bounded to their cell width and wrap long names
+  // (used in narrow table cells so they never bleed into a neighbour column)
   compact?: boolean;
   // Code-only mode: chips show the aspect code ("3.2") instead of the name.
   // Used on narrow table widths where full names cannot fit legibly.
@@ -57,6 +58,7 @@ const Chip = ({
         render={
           <button
             type="button"
+            className={compact ? "min-w-0 max-w-full" : undefined}
             onClick={(e) => {
               e.stopPropagation();
               openAspectDialog(aspect);
@@ -69,7 +71,12 @@ const Chip = ({
             codeOnly
               ? "whitespace-nowrap font-mono"
               : compact
-                ? "min-w-0 max-w-[clamp(2.5rem,18vw,9rem)] truncate"
+                ? // Base Badge is a fixed h-5 (20px) — fine for one line, but
+                  // compact mode wraps long aspect names onto 2 lines, and a
+                  // 20px box squeezes those lines into and over each other.
+                  // Releasing the height + adding real vertical padding and
+                  // line-height lets the pill grow to fit its text instead.
+                  "h-auto min-w-0 max-w-full whitespace-normal break-words py-1 leading-snug"
                 : "whitespace-nowrap"
           }`}
           style={chipStyle}

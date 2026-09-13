@@ -134,7 +134,6 @@ export const HM2_L: Record<string, string> = {
  "T0b.2": "Rules for releasing AI",
  "T0b.3": "Rules for using AI",
  "T0a.1": "Release timing",
- "T0a.2": "Developer choices",
  "T0a.3": "Secrecy around models",
  "T0a.4": "AI arms race",
  "T6.1": "Echo chambers",
