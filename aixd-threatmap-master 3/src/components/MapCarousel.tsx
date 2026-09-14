@@ -14,13 +14,23 @@ export const MapCarousel = ({
 }) => {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
+  // `index` is the click/dot-intended target — it jumps instantly so the
+  // dots and arrow disabled-states give immediate feedback. `visibleIndex`
+  // only ever moves in response to a real scroll event (see onScroll below),
+  // so it tracks whatever panel is ACTUALLY on screen right now.
   const [index, setIndex] = useState(0);
+  const [visibleIndex, setVisibleIndex] = useState(0);
   // Panels vary a lot in natural height (e.g. the aspect bubble map vs. the
   // dense mechanism graphs). A plain flex row stretches every slide to match
   // the tallest one, which strands the pagination dots and footer far below
-  // a shorter panel's real content. Instead we measure the ACTIVE panel and
-  // size the scroller to just that, so dots/footer always sit right under
-  // whatever's actually showing.
+  // a shorter panel's real content. Instead we measure the panel that's
+  // ACTUALLY visible (visibleIndex, not the click-intent index) and size the
+  // scroller to just that. Sizing off click-intent instead left a window —
+  // during the ~300-500ms smooth-scroll, or on a second click fired before
+  // the first scroll finished — where the container had already resized to
+  // the target panel's height while the screen still showed the shorter
+  // panel mid-transition: a block of dead white space under the visible
+  // content until the scroll caught up.
   const [height, setHeight] = useState<number | undefined>(undefined);
   // Arrows are anchored OUTSIDE the height-changing slide track (which is
   // sized to the active panel) at the vertical center of the TALLEST panel,
@@ -32,7 +42,7 @@ export const MapCarousel = ({
   const count = panels.length;
 
   useLayoutEffect(() => {
-    const el = panelRefs.current[index];
+    const el = panelRefs.current[visibleIndex];
     if (!el) return;
     const measure = () => setHeight(el.offsetHeight);
     measure();
@@ -48,7 +58,7 @@ export const MapCarousel = ({
       ro.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, [index]);
+  }, [visibleIndex]);
 
   useLayoutEffect(() => {
     const els = panelRefs.current.filter((el): el is HTMLDivElement => Boolean(el));
@@ -79,7 +89,12 @@ export const MapCarousel = ({
   const onScroll = () => {
     const el = scrollerRef.current;
     if (!el || el.clientWidth === 0) return;
-    setIndex(Math.round(el.scrollLeft / el.clientWidth));
+    const i = Math.round(el.scrollLeft / el.clientWidth);
+    // index still tracks scroll too (so a swipe/drag — not just a click —
+    // keeps the dots and arrow states in sync), but visibleIndex is the only
+    // thing that drives height, and only this handler ever sets it.
+    setIndex(i);
+    setVisibleIndex(i);
   };
 
   return (

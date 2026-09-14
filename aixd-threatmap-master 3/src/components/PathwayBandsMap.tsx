@@ -16,42 +16,50 @@ import { useState } from "react";
 // (HM2B_DAX + HM2B_DAW = 848 + 182 = 1030) and the canvas boundary — the
 // chips read as flush against the panel edge. Widening the canvas (rather
 // than shrinking the chips or shifting them left) adds real right padding
-// without touching anything else's position.
-const VIEW_W = 1070;
+// without touching anything else's position. Widened another 40px on top of
+// that (1070 → 1110) to make room for the wider Capability uses → Targeted
+// use gap below — the connecting arrows sat almost flush against both node
+// edges (only ~2px of real gap) with barely any room to read as curves.
+const VIEW_W = 1110;
 // The canvas matches this panel's own content: the three bands plus their
-// header fill the height with a small bottom margin — no forced height that
-// would pad the bands out and read as empty space.
-const VIEW_H = 480;
+// header fill the height with a small bottom margin. Height was bumped from
+// 480 to 552 so lanes get real height — 40px+ per row instead of a squeeze —
+// which lets node pills grow to 34px and carry a third text line, cutting the
+// "…" truncations to only the longest labels.
+const VIEW_H = 552;
 
 // Geometry rescaled from the colleague's original 430px-tall layout to this
 // site's map height, matching the client mock's panels.
-const HM2B_TX: Record<string, number> = { T0: 70, T1: 182, T2: 288, T3: 396, T4: 500, T5: 604, T6: 698, T7: 782 };
+// T5-T7 shifted +40 from their original positions (604/698/782 → 644/738/822)
+// to open up the Capability uses (T4) → Targeted use (T5) gap specifically —
+// that pair's node edges sat only ~2px apart, leaving the connecting curves
+// no real room to bow into and read as distinct arrows. The gaps among
+// T5-T6-T7 themselves are unchanged; they all just moved together.
+const HM2B_TX: Record<string, number> = { T0: 70, T1: 182, T2: 288, T3: 396, T4: 500, T5: 644, T6: 738, T7: 822 };
 const HM2B_CLUS_X: [number, number][] = [
   [14, 126],
   [126, 342],
-  [342, 656],
-  [656, 838],
+  [342, 696],
+  [696, 878],
 ];
-const HM2B_DAX = 848;
-// 182 put the chip's own right edge (HM2B_DAX + HM2B_DAW = 1030) exactly on
-// top of the band card's right edge (x=10, width=1020 → also 1030) — the
-// chip sat flush against the card that contains it, with zero gap between
-// them, even after widening the outer canvas. 170 pulls the chip in by 12px.
+const HM2B_DAX = 888;
+// Chip width — kept 12px inside the band card's own right edge (which sits
+// at HM2B_DAX + HM2B_DAW + 12) rather than flush against it.
 const HM2B_DAW = 170;
-// Band geometry scaled ×1.2 from the original 400px-tall layout to fill the
-// taller 480px canvas — otherwise the content stays pinned to the top and
-// the extra height becomes dead space at the bottom. The third band (Lock-in
-// & power concentration) is the shortest, so its two 2-lane node rows fence
-// with 34px lanes and the first-row pills ("Rules for building AI" etc.) used
-// to start exactly where the band title's descenders end. It gets extra height
-// (and sits 6px higher) so that lane height grows to 43px and the pills sit
-// ~4px clear of the title — real breathing room instead of a kiss.
+// Band geometry scaled from the colleague's original 400px-tall layout and
+// then re-flowed for a 552px canvas: card heights are sized to each band's
+// lane count (4 / 2 / 2 lanes) with ~14px gaps between cards and a real
+// margin under the header chips. The third band (Lock-in & power
+// concentration) is the tightest — the "Rules for building AI" pills at
+// lane 0 sit directly under the band title — so it gets extra height to grow
+// lane height to 48px and keep the first-row pills ~4px clear of the title's
+// descenders instead of kissing them.
 const HM2B_BAND = [
-  { top: 83, h: 163 },
-  { top: 257, h: 112 },
-  { top: 376, h: 112 },
+  { top: 90, h: 196 },
+  { top: 300, h: 124 },
+  { top: 434, h: 122 },
 ];
-const HM2B_NODE_W = 98;
+const HM2B_NODE_W = 102;
 // Header strip rows: every cluster title plus the democracy-affected column
 // sits at the very top of the svg on one aligned baseline (HM2B_TITLE_Y2),
 // each centred over its territory; the titles too long for their columns wrap
@@ -61,7 +69,7 @@ const HM2B_NODE_W = 98;
 const HM2B_TITLE_Y2 = 20;
 const HM2B_TITLE_WRAP = 32;
 const HM2B_CHIP_Y = 55;
-const HM2B_VLINE_BOTTOM = 472;
+const HM2B_VLINE_BOTTOM = 540;
 
 const TITLE = "Through which pathways does the literature link AI to harm for democracy?";
 const NOTE =
@@ -245,8 +253,19 @@ export const PathwayBandsMap = ({
               });
               return (
                 <g key={fi}>
-                  <rect x={10} y={b.top - 16} width={1020} height={b.h} rx={14} fill={fi % 2 ? "#FBFBF3" : "#F7F7EE"} stroke="#E4E4D6" strokeWidth={1} />
-                  <rect x={10} y={b.top - 16} width={5} height={b.h} rx={2.5} fill="#963735" opacity={0.75} />
+                  {/* The accent bar's own rx (2.5) is far tighter than the
+                      card's (14), so near the top/bottom the card's edge has
+                      already curved inward while the bar's corners are still
+                      almost square — the bar's corners poke out past where
+                      the card's own rounded silhouette has receded to,
+                      reading as a separate pill glued on top rather than an
+                      inset border. Clipping the bar to the card's own
+                      rounded-rect shape makes it follow that exact curve. */}
+                  <clipPath id={`band-clip-${fi}`}>
+                    <rect x={10} y={b.top - 16} width={1060} height={b.h} rx={14} />
+                  </clipPath>
+                  <rect x={10} y={b.top - 16} width={1060} height={b.h} rx={14} fill={fi % 2 ? "#FBFBF3" : "#F7F7EE"} stroke="#E4E4D6" strokeWidth={1} />
+                  <rect x={10} y={b.top - 16} width={5} height={b.h} fill="#963735" opacity={0.75} clipPath={`url(#band-clip-${fi})`} />
                   {/* Band title sits right under the rounded card's top edge
                       (rect starts at b.top-16) — nudged down from the previous
                       b.top-4 to b.top+2 for real breathing room above the text.
@@ -264,11 +283,41 @@ export const PathwayBandsMap = ({
                     </tspan>
                   </text>
 
-                  {f.segs.map((sg, si) => {
+                  {/* Node columns can sit as little as ~2px apart edge-to-edge
+                      (e.g. Capability uses → Targeted use), so however a
+                      curve between them is bent, there's essentially no gap
+                      to bend it INTO — any curviness just cranks up inside
+                      that same sliver of space. The actual fix for several
+                      links sharing one node: today every sibling starts (or
+                      ends) at that node's exact center, so they're born from
+                      one pixel with zero space between them regardless of
+                      column gap. Spreading each sibling's attachment point
+                      across the node's own height instead gives them real
+                      separation from the moment they leave it. */}
+                  {(() => {
+                    const nodeH = Math.min(34, laneH - 6);
+                    const attachSpan = nodeH * 0.6;
+                    const attachOffset = (rank: number, count: number) =>
+                      count > 1 ? (rank / (count - 1) - 0.5) * attachSpan : 0;
+
+                    return f.segs.map((sg, si) => {
+                    const outSiblings = f.segs.filter((s) => s.a === sg.a).sort((p, q) => ny[p.b] - ny[q.b]);
+                    const inSiblings = f.segs.filter((s) => s.b === sg.b).sort((p, q) => ny[p.a] - ny[q.a]);
+                    const y1 = ny[sg.a] + attachOffset(outSiblings.findIndex((s) => s.b === sg.b), outSiblings.length);
+                    const y2 = ny[sg.b] + attachOffset(inSiblings.findIndex((s) => s.a === sg.a), inSiblings.length);
                     const x1 = nx[sg.a] + HM2B_NODE_W / 2;
-                    const y1 = ny[sg.a];
                     const x2 = nx[sg.b] - HM2B_NODE_W / 2;
-                    const y2 = ny[sg.b];
+                    // A fixed 24px reach for both control points, regardless
+                    // of how tight the column gap is (some are only a couple
+                    // of px edge-to-edge). Scaling this down to the gap
+                    // seemed safer on paper but collapsed the curve into a
+                    // near-straight, kinked line for tight columns — visibly
+                    // worse. The pill nodes render after (below) these paths,
+                    // so a control point reaching past a neighbour's edge is
+                    // simply hidden under that pill's opaque fill, not a
+                    // visible defect.
+                    const cx1 = x1 + 24;
+                    const cx2 = x2 - 24;
                     const mx = (x1 + x2) / 2;
                     const my = (y1 + y2) / 2;
                     const col = TIER_COLORS[hm2TierOfPath(sg.b) ?? "T0"];
@@ -302,7 +351,7 @@ export const PathwayBandsMap = ({
                         }}
                       >
                         <path
-                          d={`M${x1} ${y1} C ${x1 + 24} ${y1}, ${x2 - 24} ${y2}, ${x2} ${y2}`}
+                          d={`M${x1} ${y1} C ${cx1} ${y1}, ${cx2} ${y2}, ${x2} ${y2}`}
                           fill="none"
                           stroke={col}
                           strokeWidth={(0.9 + sg.n * 0.42).toFixed(1)}
@@ -314,20 +363,26 @@ export const PathwayBandsMap = ({
                         </text>
                       </g>
                     );
-                  })}
+                    });
+                  })()}
 
                   {f.nodes.map((n) => {
                     const x = nx[n.c];
                     const y = ny[n.c];
                     const col = TIER_COLORS["T" + n.t];
-                    const h = Math.min(30, laneH - 5);
-                    // 15 chars/line at 10px bold nearly spans the full 98px
-                    // node width (~90-97px), leaving no side padding — labels
-                    // read as pressed against the pill's edge. 12 leaves a
-                    // real margin on both sides.
-                    const all = wrapWords(lbl(n.c), 12);
-                    const lines = all.slice(0, 2);
-                    const trunc = all.length > 2;
+                    const h = Math.min(34, laneH - 6);
+                    // 15 chars/line at 10px bold is the most that fits a
+                    // 102px pill with real side margins (the 98px width was
+                    // capped by the 104px T4→T5 column gap; 102 keeps a
+                    // thin air gap between neighbouring pills). Two lines
+                    // handle most names; taller lanes on the 2-lane bands
+                    // give the longest labels a third line so only
+                    // "Disinformation & deepfakes about political content"
+                    // still drops a trailing "…".
+                    const all = wrapWords(lbl(n.c), 15);
+                    const maxLines = h >= 30 ? 3 : 2;
+                    const lines = all.slice(0, maxLines);
+                    const trunc = all.length > lines.length;
                     const activateNode = () => {
                       const t = hm2TierOfPath(n.c);
                       const clusterName = HM2_CLUSTERS.find((k) => t && k.tiers.includes(t))?.name || "";
@@ -375,21 +430,21 @@ export const PathwayBandsMap = ({
                           stroke={selCode === n.c ? mixInk(col, 0.25) : withAlpha(col, 0.55)}
                           strokeWidth={selCode === n.c ? 2.5 : 1.5}
                         />
-                        {lines.length === 1 ? (
-                          <text x={x} y={y} textAnchor="middle" dominantBaseline="central" fontSize={10} fontWeight={700} fill={mixInk(col, 0.25)}>
-                            {lines[0]}
+                        {lines.map((ln, li) => (
+                          <text
+                            key={li}
+                            x={x}
+                            y={y + (li - (lines.length - 1) / 2) * 9}
+                            textAnchor="middle"
+                            dominantBaseline="central"
+                            fontSize={10}
+                            fontWeight={700}
+                            fill={mixInk(col, 0.25)}
+                          >
+                            {ln}
+                            {trunc && li === lines.length - 1 ? "…" : ""}
                           </text>
-                        ) : (
-                          <>
-                            <text x={x} y={y - 5} textAnchor="middle" dominantBaseline="central" fontSize={10} fontWeight={700} fill={mixInk(col, 0.25)}>
-                              {lines[0]}
-                            </text>
-                            <text x={x} y={y + 6} textAnchor="middle" dominantBaseline="central" fontSize={10} fontWeight={700} fill={mixInk(col, 0.25)}>
-                              {lines[1]}
-                              {trunc ? "…" : ""}
-                            </text>
-                          </>
-                        )}
+                        ))}
                       </g>
                     );
                   })}
@@ -515,6 +570,7 @@ export const PathwayBandsMap = ({
         <SelectAsFilter
           target={filterTarget}
           onApply={onFilterTable}
+          onDismiss={() => setFilterTarget(null)}
         />
       )}
 

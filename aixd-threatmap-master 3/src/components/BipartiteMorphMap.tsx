@@ -338,19 +338,19 @@ export const BipartiteMorphMap = ({
 
       {view.type === "tier" && onFilterTable && (() => {
         const target: VizFilter = { key: "harm", codes: [view.t], label: HM2_TIER_SHORT[view.t] ?? view.t };
-        return <SelectAsFilter target={target} onApply={onFilterTable} />;
+        return <SelectAsFilter target={target} onApply={onFilterTable} onDismiss={() => setView({ type: "overview" })} />;
       })()}
       {view.type === "ben" && onFilterTable && (() => {
         const target: VizFilter = { key: "benefit", codes: [view.b], label: blabel(view.b) };
-        return <SelectAsFilter target={target} onApply={onFilterTable} />;
+        return <SelectAsFilter target={target} onApply={onFilterTable} onDismiss={() => setView({ type: "overview" })} />;
       })()}
       {view.type === "edge" && onFilterTable && (() => {
         const harmTarget: VizFilter = { key: "harm", codes: [view.t], label: HM2_TIER_SHORT[view.t] ?? view.t };
         const benefitTarget: VizFilter = { key: "benefit", codes: [view.b], label: blabel(view.b) };
         return (
           <div className="flex flex-wrap gap-2">
-            <SelectAsFilter target={harmTarget} onApply={onFilterTable} />
-            <SelectAsFilter target={benefitTarget} onApply={onFilterTable} />
+            <SelectAsFilter target={harmTarget} onApply={onFilterTable} onDismiss={() => setView({ type: "overview" })} />
+            <SelectAsFilter target={benefitTarget} onApply={onFilterTable} onDismiss={() => setView({ type: "overview" })} />
           </div>
         );
       })()}
