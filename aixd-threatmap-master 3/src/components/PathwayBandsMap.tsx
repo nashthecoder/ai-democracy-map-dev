@@ -128,13 +128,20 @@ export const PathwayBandsMap = ({
   // Formation and Political…") — hover reveals the full name plus the same
   // mention count the click detail below shows, using the panel's existing
   // hover-tip mechanism (already wired up for the cluster headers above).
-  const openDATip = (code: string, name: string, count: number, total: number, pathway: string, rect: DOMRect) =>
+  const openDATip = (code: string, name: string, count: number, total: number, pathway: string, rect: DOMRect, bounds?: DOMRect) =>
     open(
       {
         title: `${code} ${name}`,
         description: `Mentioned in ${formatCount(count)} of ${formatCount(total)} entries in the pathway "${pathway}".`,
       },
-      rect
+      rect,
+      // These chips are stacked tightly in a column — dropping the tip
+      // above/below (the default) covers the hovered chip and its neighbour.
+      // Placing it to the right instead keeps every pill in the column clear.
+      "right",
+      // Clamp inside the panel card itself rather than the full viewport, so
+      // the tip never spills out over neighbouring page content.
+      bounds
     );
   const lbl = (c: string) => hm2Lbl(c, harmTaxonomy);
   // The clicked (filterable) code — highlighted in the diagram + legend.

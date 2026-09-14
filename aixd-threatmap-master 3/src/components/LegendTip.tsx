@@ -27,11 +27,48 @@ export const useLegendTip = () => {
   const anchorRef = useRef<DOMRect | null>(null);
   const tipRef = useRef<HTMLDivElement | null>(null);
 
-  const open = (data: LegendTipData, rect: DOMRect) => {
-    const above = rect.top > 240;
-    const left = Math.max(8, Math.min(rect.left, window.innerWidth - 316));
+  const TIP_WIDTH = 240;
+
+  // "auto" (default) drops the tip above/below the anchor, left-aligned to
+  // it — right for a wide legend row, but for a narrow chip stacked among
+  // siblings (e.g. a democracy-aspect pill), dropping above/below covers the
+  // chip itself and the next one in the stack. "right" instead places the
+  // tip beside the anchor, at its own vertical level, so it never overlaps
+  // any pill in that column.
+  //
+  // `bounds`, when given (typically the panel card's own rect), clamps the
+  // tip inside that container instead of the full viewport — otherwise a tip
+  // opened near a panel's edge can spill out over neighbouring page content.
+  const open = (data: LegendTipData, rect: DOMRect, placement: "auto" | "right" = "auto", bounds?: DOMRect) => {
     anchorRef.current = rect;
     setTip(data);
+    const pad = 8;
+    const minX = bounds ? bounds.left + pad : pad;
+    const maxX = bounds ? bounds.right - pad : window.innerWidth - pad;
+    const minY = bounds ? bounds.top + pad : pad;
+    const maxY = bounds ? bounds.bottom - pad : window.innerHeight - pad;
+    // Estimated tip height for clamping purposes — the real height is only
+    // known after render, but title+description (no sub-code list) reliably
+    // lands under ~110px, which is all "right" placement needs to stay tidy.
+    const estH = data.lines?.length ? 220 : 110;
+    if (placement === "right") {
+      // These anchors are often near the right edge of their container (the
+      // rightmost column of a diagram) — clamping a fixed "rect.right + gap"
+      // into the visible width there just pulls the tip back over the chip
+      // it's meant to clear. Flip to the LEFT of the anchor instead whenever
+      // there isn't genuinely enough room on the right.
+      const gap = 10;
+      const roomRight = maxX - rect.right - gap;
+      const left =
+        roomRight >= TIP_WIDTH
+          ? rect.right + gap
+          : Math.max(minX, rect.left - gap - TIP_WIDTH);
+      const top = Math.max(minY, Math.min(rect.top, maxY - estH));
+      setPos({ left, top, above: false });
+      return;
+    }
+    const above = rect.top > minY + 240;
+    const left = Math.max(minX, Math.min(rect.left, maxX - TIP_WIDTH));
     setPos({ left, top: above ? rect.top - 10 : rect.bottom + 10, above });
   };
 
@@ -73,7 +110,7 @@ export const useLegendTip = () => {
         left: pos.left,
         top: pos.top,
         transform: pos.above ? "translateY(-100%)" : undefined,
-        width: 300,
+        width: TIP_WIDTH,
         pointerEvents: "auto",
         zIndex: 60,
         background: "#F4F4EA",
@@ -81,33 +118,36 @@ export const useLegendTip = () => {
         border: "0.5px solid rgba(26, 26, 23, 0.6)",
         borderRadius: 10,
         boxShadow: "0 14px 34px rgba(26, 26, 23, 0.18)",
-        padding: "10px 14px",
+        padding: "9px 12px",
         textAlign: "left",
       }}
     >
+      {/* Sized down from the original 11/12.5px — next to the diagram's own
+          10-11px labels those read oversized, more like a heading than a
+          tooltip. */}
       <div
         style={{
-          fontSize: 11,
-          letterSpacing: "0.08em",
+          fontSize: 9.5,
+          letterSpacing: "0.06em",
           textTransform: "uppercase",
           color: "rgba(26,26,23,0.55)",
-          marginBottom: 4,
+          marginBottom: 3,
         }}
       >
         {tip.title}
       </div>
       {tip.description && (
-        <div style={{ fontSize: 12.5, lineHeight: 1.5, color: "rgba(26,26,23,0.9)" }}>{tip.description}</div>
+        <div style={{ fontSize: 10.5, lineHeight: 1.45, color: "rgba(26,26,23,0.9)" }}>{tip.description}</div>
       )}
       {tip.lines && tip.lines.length > 0 && (
-        <div style={{ marginTop: 8, borderTop: "0.5px solid rgba(26,26,23,0.2)", paddingTop: 7 }}>
+        <div style={{ marginTop: 7, borderTop: "0.5px solid rgba(26,26,23,0.2)", paddingTop: 6 }}>
           <div
             style={{
-              fontSize: 10.5,
-              letterSpacing: "0.08em",
+              fontSize: 9,
+              letterSpacing: "0.06em",
               textTransform: "uppercase",
               color: "rgba(26,26,23,0.55)",
-              marginBottom: 5,
+              marginBottom: 4,
             }}
           >
             Sub-codes
@@ -118,7 +158,7 @@ export const useLegendTip = () => {
               padding: 0,
               paddingRight: 4,
               listStyle: "none",
-              maxHeight: 220,
+              maxHeight: 200,
               overflowY: "auto",
               overscrollBehavior: "contain",
               display: "grid",
@@ -127,7 +167,7 @@ export const useLegendTip = () => {
             }}
           >
             {tip.lines.map((l) => (
-              <li key={l} style={{ fontSize: 12, lineHeight: 1.35, color: "rgba(26,26,23,0.85)", display: "flex", gap: 7 }}>
+              <li key={l} style={{ fontSize: 10.5, lineHeight: 1.3, color: "rgba(26,26,23,0.85)", display: "flex", gap: 6 }}>
                 <span style={{ color: "rgba(26,26,23,0.4)", flexShrink: 0 }}>•</span>
                 <span>{l}</span>
               </li>
