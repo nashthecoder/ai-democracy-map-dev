@@ -124,6 +124,18 @@ export const PathwayBandsMap = ({
       },
       rect
     );
+  // Democracy-aspect chip names truncate hard in the ~150px column ("Opinion
+  // Formation and Political…") — hover reveals the full name plus the same
+  // mention count the click detail below shows, using the panel's existing
+  // hover-tip mechanism (already wired up for the cluster headers above).
+  const openDATip = (code: string, name: string, count: number, total: number, pathway: string, rect: DOMRect) =>
+    open(
+      {
+        title: `${code} ${name}`,
+        description: `Mentioned in ${formatCount(count)} of ${formatCount(total)} entries in the pathway "${pathway}".`,
+      },
+      rect
+    );
   const lbl = (c: string) => hm2Lbl(c, harmTaxonomy);
   // The clicked (filterable) code — highlighted in the diagram + legend.
   const selCode = filterTarget?.codes[0] ?? null;
@@ -504,6 +516,12 @@ export const PathwayBandsMap = ({
                             activateDA();
                           }
                         }}
+                        onMouseEnter={(e) =>
+                          openDATip(d[0], HM2_DA_NAME[d[0]] || d[0], d[1], f.units, f.name, e.currentTarget.getBoundingClientRect())
+                        }
+                        onFocus={(e) =>
+                          openDATip(d[0], HM2_DA_NAME[d[0]] || d[0], d[1], f.units, f.name, e.currentTarget.getBoundingClientRect())
+                        }
                       >
                         <rect
                           x={HM2B_DAX}
