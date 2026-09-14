@@ -22,6 +22,9 @@ import type { VizFilter } from "@/lib/types";
 import { useMemo, useState } from "react";
 
 const VIEW_W = 1040;
+// The canvas matches this panel's own content: the band fills TOP..BOT plus a
+// small bottom margin — no forced height that would spread the rows out and
+// leave dead space inside the diagram.
 const VIEW_H = 480;
 
 // Geometry verbatim from the client mock (docs/2_Claude Code of Mock Website_UPDATED.jsx),

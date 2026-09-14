@@ -12,7 +12,15 @@ import type { VizFilter } from "@/lib/types";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
-const VIEW_W = 1040;
+// 1040 originally left only 10px between the DA-chip column's right edge
+// (HM2B_DAX + HM2B_DAW = 848 + 182 = 1030) and the canvas boundary — the
+// chips read as flush against the panel edge. Widening the canvas (rather
+// than shrinking the chips or shifting them left) adds real right padding
+// without touching anything else's position.
+const VIEW_W = 1070;
+// The canvas matches this panel's own content: the three bands plus their
+// header fill the height with a small bottom margin — no forced height that
+// would pad the bands out and read as empty space.
 const VIEW_H = 480;
 
 // Geometry rescaled from the colleague's original 430px-tall layout to this
@@ -25,20 +33,35 @@ const HM2B_CLUS_X: [number, number][] = [
   [656, 838],
 ];
 const HM2B_DAX = 848;
-const HM2B_DAW = 182;
+// 182 put the chip's own right edge (HM2B_DAX + HM2B_DAW = 1030) exactly on
+// top of the band card's right edge (x=10, width=1020 → also 1030) — the
+// chip sat flush against the card that contains it, with zero gap between
+// them, even after widening the outer canvas. 170 pulls the chip in by 12px.
+const HM2B_DAW = 170;
 // Band geometry scaled ×1.2 from the original 400px-tall layout to fill the
 // taller 480px canvas — otherwise the content stays pinned to the top and
-// the extra height just becomes new dead space at the bottom.
+// the extra height becomes dead space at the bottom. The third band (Lock-in
+// & power concentration) is the shortest, so its two 2-lane node rows fence
+// with 34px lanes and the first-row pills ("Rules for building AI" etc.) used
+// to start exactly where the band title's descenders end. It gets extra height
+// (and sits 6px higher) so that lane height grows to 43px and the pills sit
+// ~4px clear of the title — real breathing room instead of a kiss.
 const HM2B_BAND = [
   { top: 83, h: 163 },
   { top: 257, h: 112 },
-  { top: 382, h: 94 },
+  { top: 376, h: 112 },
 ];
 const HM2B_NODE_W = 98;
-const HM2B_TITLE_Y1 = 18;
-const HM2B_TITLE_Y2 = 31;
-const HM2B_CHIP_Y = 52;
-const HM2B_VLINE_BOTTOM = 462;
+// Header strip rows: every cluster title plus the democracy-affected column
+// sits at the very top of the svg on one aligned baseline (HM2B_TITLE_Y2),
+// each centred over its territory; the titles too long for their columns wrap
+// onto a distinct second row (HM2B_TITLE_WRAP); the tier sub-title chips sit
+// below with real padding between them (HM2B_CHIP_Y) so the headers read as
+// their own block instead of sitting on top of the column labels.
+const HM2B_TITLE_Y2 = 20;
+const HM2B_TITLE_WRAP = 32;
+const HM2B_CHIP_Y = 55;
+const HM2B_VLINE_BOTTOM = 472;
 
 const TITLE = "Through which pathways does the literature link AI to harm for democracy?";
 const NOTE =
@@ -102,8 +125,6 @@ export const PathwayBandsMap = ({
     setActive(html);
   };
 
-  const bandTitleX = (name: string) => 24 + name.length * 6.4;
-
   return (
     <VizPanelCard
       id="viz-pathway-bands-map"
@@ -124,7 +145,13 @@ export const PathwayBandsMap = ({
             {HM2B_CLUS_X.map((cx, ci) => {
               const c = HM2_CLUSTERS[ci];
               const mid = (cx[0] + cx[1]) / 2;
-              const nameLines = wrapWords(c.name, 20).slice(0, 2);
+              // Titles that would overflow their own territory wrap instead
+              // ("Downstream social dynamics" is ~197px at this size against
+              // a 182px column; "Properties and capabilities" at 174px fits
+              // its wider 216px one) so only the genuinely-long names drop
+              // onto the distinct second header row.
+              const wrap = c.name.length > 18 && cx[1] - cx[0] < 200;
+              const nameLines = wrap ? wrapWords(c.name, 17) : [c.name];
               return (
                 <g key={ci}>
                   {ci > 0 && (
@@ -137,65 +164,51 @@ export const PathwayBandsMap = ({
                     x={cx[0] - 8}
                     y={4}
                     width={cx[1] - cx[0] + 16}
-                    height={HM2B_TITLE_Y2 + 12}
+                    height={HM2B_CHIP_Y}
                     fill="#1a1a17"
                     fillOpacity={0}
                     style={{ cursor: "help" }}
                     onMouseEnter={(e) => openClusterTip(c.name, c.tiers, e.currentTarget.getBoundingClientRect())}
                   />
-                  {nameLines.length === 1 ? (
-                    <text
-                      x={mid}
-                      y={HM2B_TITLE_Y2}
-                      textAnchor="middle"
-                      fontSize={11.5}
-                      fontWeight={800}
-                      fill="#1a1a17"
-                      style={{ pointerEvents: "none" }}
-                    >
-                      {nameLines[0]}
-                    </text>
-                  ) : (
-                    <>
-                      <text
-                        x={mid}
-                        y={HM2B_TITLE_Y1}
-                        textAnchor="middle"
-                        fontSize={11.5}
-                        fontWeight={800}
-                        fill="#1a1a17"
-                        style={{ pointerEvents: "none" }}
-                      >
-                        {nameLines[0]}
-                      </text>
-                      <text
-                        x={mid}
-                        y={HM2B_TITLE_Y2}
-                        textAnchor="middle"
-                        fontSize={11.5}
-                        fontWeight={800}
-                        fill="#1a1a17"
-                        style={{ pointerEvents: "none" }}
-                      >
-                        {nameLines[1]}
-                      </text>
-                    </>
-                  )}
+                  {/* Cluster titles read as a layered header, not one unbroken
+                      line: Context, Properties and capabilities and AI model
+                      use fit their columns and share a single baseline, while
+                      Downstream social dynamics wraps onto a distinct second
+                      row — same title weight, a real line break, still above
+                      the tier sub-title chips. */}
+                  <text
+                    x={mid}
+                    y={HM2B_TITLE_Y2}
+                    textAnchor="middle"
+                    fontSize={12.5}
+                    fontWeight={800}
+                    fill="#1a1a17"
+                    style={{ pointerEvents: "none" }}
+                  >
+                    {nameLines.map((ln, li) => (
+                      <tspan key={li} x={mid} dy={li === 0 ? 0 : HM2B_TITLE_WRAP - HM2B_TITLE_Y2}>
+                        {ln}
+                      </tspan>
+                    ))}
+                  </text>
                   {/* Skip the per-tier chip label when a cluster has only one
                       tier — e.g. "Context" (T0 alone), whose tier short name
                       is also literally "Context". With one member the group
                       title above already says it; repeating it as a chip
                       right underneath just duplicates the same word twice. */}
                   {c.tiers.length > 1 && c.tiers.map((t) => {
-                    // Tier columns are only 84–112px apart — long labels like
-                    // "Individual downstream" render wider than that as one
-                    // line and spill into neighboring columns. Wrap them the
-                    // same way the cluster title above already is.
-                    const lines = wrapWords(HM2_TIER_SHORT[t], 11).slice(0, 2);
+                    // Tier columns are only 84–112px apart — at the old 11-char
+                    // budget nearly every name fractured into two lines ("AI" /
+                    // "capabilities") at mixed baselines, so the sub-title row
+                    // read as ragged fragments. 17 lets all but the longest
+                    // names ("Individual downstream", "Societal downstream") sit
+                    // on one whole-word line, keeping the row aligned and the
+                    // labels clearly subordinate to the cluster titles above.
+                    const lines = wrapWords(HM2_TIER_SHORT[t], 17).slice(0, 2);
                     return (
-                      <text key={t} x={HM2B_TX[t]} y={HM2B_CHIP_Y} textAnchor="middle" fontSize={10} fontWeight={700} fill={TIER_COLORS[t]}>
+                      <text key={t} x={HM2B_TX[t]} y={HM2B_CHIP_Y} textAnchor="middle" fontSize={10.5} fontWeight={600} fill={TIER_COLORS[t]}>
                         {lines.map((line, li) => (
-                          <tspan key={li} x={HM2B_TX[t]} dy={li === 0 ? (lines.length > 1 ? -5 : 0) : 11}>
+                          <tspan key={li} x={HM2B_TX[t]} dy={li === 0 ? (lines.length > 1 ? -2 : 0) : 9}>
                             {line}
                           </tspan>
                         ))}
@@ -207,16 +220,17 @@ export const PathwayBandsMap = ({
             })}
 
             <line x1={HM2B_DAX - 8} y1={6} x2={HM2B_DAX - 8} y2={HM2B_VLINE_BOTTOM} stroke="#D6D6CA" strokeWidth={1} />
-            {/* Left-aligned to the pills' own left edge (HM2B_DAX + 9), not
-                centered on the column — every pill below is left-anchored
-                (code and name both start flush left), so a centered header
-                reads as offset from the content it's labeling even though
-                the two are mathematically centered on the same axis. */}
-            <text x={HM2B_DAX + 9} y={HM2B_TITLE_Y1} fontSize={11.5} fontWeight={800} fill="#1a1a17">
-              Democracy
-            </text>
-            <text x={HM2B_DAX + 9} y={HM2B_TITLE_Y2} fontSize={11.5} fontWeight={800} fill="#1a1a17">
-              aspects affected
+            {/* Centred over the democracy-affected column like the cluster headings
+                over theirs — the header row treats it as a fifth column even
+                though its pills are left-anchored. Wraps like the Downstream
+                social dynamics title because its full name is too wide for
+                the column. */}
+            <text x={HM2B_DAX + HM2B_DAW / 2} y={HM2B_TITLE_Y2} textAnchor="middle" fontSize={12.5} fontWeight={800} fill="#1a1a17">
+              {wrapWords("Democracy aspects affected", 16).map((ln, li) => (
+                <tspan key={li} x={HM2B_DAX + HM2B_DAW / 2} dy={li === 0 ? 0 : HM2B_TITLE_WRAP - HM2B_TITLE_Y2}>
+                  {ln}
+                </tspan>
+              ))}
             </text>
 
             {HM2_PATHS.map((f, fi) => {
@@ -233,11 +247,21 @@ export const PathwayBandsMap = ({
                 <g key={fi}>
                   <rect x={10} y={b.top - 16} width={1020} height={b.h} rx={14} fill={fi % 2 ? "#FBFBF3" : "#F7F7EE"} stroke="#E4E4D6" strokeWidth={1} />
                   <rect x={10} y={b.top - 16} width={5} height={b.h} rx={2.5} fill="#963735" opacity={0.75} />
-                  <text x={24} y={b.top - 4} fontSize={11.5} fontWeight={800} fill="#1a1a17">
+                  {/* Band title sits right under the rounded card's top edge
+                      (rect starts at b.top-16) — nudged down from the previous
+                      b.top-4 to b.top+2 for real breathing room above the text.
+                      Title + count are one <text> with the count as a tspan
+                      so the browser lays out real glyph widths — the old
+                      two-<text> version positioned the count by estimating
+                      the title's pixel width from its character count, which
+                      undershot for longer titles and ran the count straight
+                      into the title's last letters. */}
+                  <text x={24} y={b.top + 2} fontSize={11.5} fontWeight={800} fill="#1a1a17">
                     {f.name}
-                  </text>
-                  <text x={bandTitleX(f.name)} y={b.top - 4} fontSize={10} fontWeight={600} fill="#9A9A92">
-                    · {formatCount(f.units)} entries
+                    <tspan fontSize={10} fontWeight={600} fill="#9A9A92">
+                      {" "}
+                      · {formatCount(f.units)} entries
+                    </tspan>
                   </text>
 
                   {f.segs.map((sg, si) => {
@@ -297,7 +321,11 @@ export const PathwayBandsMap = ({
                     const y = ny[n.c];
                     const col = TIER_COLORS["T" + n.t];
                     const h = Math.min(30, laneH - 5);
-                    const all = wrapWords(lbl(n.c), 15);
+                    // 15 chars/line at 10px bold nearly spans the full 98px
+                    // node width (~90-97px), leaving no side padding — labels
+                    // read as pressed against the pill's edge. 12 leaves a
+                    // real margin on both sides.
+                    const all = wrapWords(lbl(n.c), 12);
                     const lines = all.slice(0, 2);
                     const trunc = all.length > 2;
                     const activateNode = () => {
@@ -386,8 +414,8 @@ export const PathwayBandsMap = ({
                     // padding rather than stretching the line spacing.
                     const hh = Math.min(50, step - 10);
                     const col = HM2_DA_PILLAR[d[0][0]];
-                    const nameLines = wrapWords(HM2_DA_NAME[d[0]] || d[0], 24).slice(0, 2);
-                    const nameTrunc = wrapWords(HM2_DA_NAME[d[0]] || d[0], 24).length > 2;
+                    const nameLines = wrapWords(HM2_DA_NAME[d[0]] || d[0], 22).slice(0, 2);
+                    const nameTrunc = wrapWords(HM2_DA_NAME[d[0]] || d[0], 22).length > 2;
                     const activateDA = () => {
                       setFilterTarget({
                         key: "aspect",
@@ -434,17 +462,21 @@ export const PathwayBandsMap = ({
                         />
                         {/* Row offsets are fixed (not scaled to hh) so extra
                             pill height becomes real padding above/below the
-                            text block instead of stretching the line gaps. */}
-                        <text x={HM2B_DAX + 9} y={y - 10} dominantBaseline="central" fontSize={10} fontWeight={800} fill={mixInk(col, 0.25)}>
+                            text block instead of stretching the line gaps.
+                            Left/right insets bumped 9/8 → 12/12 — at the old
+                            insets the code and count text sat right against
+                            the pill's rx=10 rounded corners with no visible
+                            margin. */}
+                        <text x={HM2B_DAX + 12} y={y - 10} dominantBaseline="central" fontSize={10} fontWeight={800} fill={mixInk(col, 0.25)}>
                           {d[0]}
                         </text>
-                        <text x={HM2B_DAX + HM2B_DAW - 8} y={y - 10} textAnchor="end" dominantBaseline="central" fontSize={9.5} fontWeight={700} fill={mixInk(col, 0.25)}>
+                        <text x={HM2B_DAX + HM2B_DAW - 12} y={y - 10} textAnchor="end" dominantBaseline="central" fontSize={9.5} fontWeight={700} fill={mixInk(col, 0.25)}>
                           {formatCount(d[1])} entries
                         </text>
                         {nameLines.map((line, li) => (
                           <text
                             key={li}
-                            x={HM2B_DAX + 9}
+                            x={HM2B_DAX + 12}
                             y={y + li * 10}
                             dominantBaseline="central"
                             fontSize={10}

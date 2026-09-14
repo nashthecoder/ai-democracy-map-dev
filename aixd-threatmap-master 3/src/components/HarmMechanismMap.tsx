@@ -8,12 +8,18 @@ import type { HarmTaxonomy, Item, VizFilter } from "@/lib/types";
 import { withAlpha } from "@/lib/codes";
 import { HARM_TIER_DESC } from "@/lib/legendInfo";
 import { forceCollide, forceLink, forceManyBody, forceSimulation, forceY } from "d3";
-import { useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
 const VIEW_W = 1040;
-const VIEW_H = 480;
+const VIEW_H = 600;
+const MIN_W = 640;
 const MARGIN = 56;
 const TOP_MARGIN = 64;
+// Vertical room reserved under each node, since every node always shows a
+// title (two 10px lines spaced 11px, rendered at y + r + 11). The panel
+// height grows to fit the most packed tier so no title is ever clipped.
+const LABEL_H = 24;
+const MIN_GAP = 6;
 
 const TIER_ORDER = ["tier0", "tier1", "tier2", "tier3", "tier4", "tier5", "tier6", "tier7"];
 const TIER_CODE = { tier0: "T0", tier1: "T1", tier2: "T2", tier3: "T3", tier4: "T4", tier5: "T5", tier6: "T6", tier7: "T7" } as const;
@@ -78,9 +84,9 @@ const tierOfCode = (code: string, taxonomy: HarmTaxonomy): string => {
 
 type GraphNode = { id: string; label: string; value: number; tier: string; order: number };
 
-function useTieredForceLayout(nodes: GraphNode[], edges: { source: string; target: string; weight: number }[], width: number, height: number) {
+function useTieredForceLayout(nodes: GraphNode[], edges: { source: string; target: string; weight: number }[], width: number) {
   return useMemo(() => {
-    if (nodes.length === 0) return { nodes: [] as any[], links: [] as any[], radius: () => 6, colX: () => 0 };
+    if (nodes.length === 0) return { nodes: [] as any[], links: [] as any[], radius: () => 6, colX: () => 0, height: VIEW_H };
     const colWidth = (width - MARGIN * 2) / TIER_ORDER.length;
     const colX = (tier: string) => MARGIN + colWidth * TIER_ORDER.indexOf(tier) + colWidth / 2;
 
@@ -96,7 +102,7 @@ function useTieredForceLayout(nodes: GraphNode[], edges: { source: string; targe
     const nodeById = new Map();
     const simNodes: any[] = [];
     Object.entries(byTier).forEach(([tier, list]) => {
-      const usableH = height - TOP_MARGIN - 30;
+      const usableH = VIEW_H - TOP_MARGIN - 30;
       list.forEach((n, i) => {
         const y = TOP_MARGIN + ((i + 0.5) / Math.max(list.length, 1)) * usableH;
         const node = { ...n, tier, x: colX(tier), y, fx: colX(tier) };
@@ -112,6 +118,9 @@ function useTieredForceLayout(nodes: GraphNode[], edges: { source: string; targe
     const maxVal = Math.max(1, ...nodes.map((n) => n.value || 0));
     const radius = (n: any) => 5 + 22 * Math.sqrt(Math.max(0, n.value || 0) / maxVal);
 
+    // Every node carries a title, so this step's vertical space must cover the
+    // whole data set: the tallest tier decides the SVG height, computed up front
+    // so the band below always clears the worst column target & ≥ MIN_GAP gaps.
     const sim = forceSimulation(simNodes)
       .force("y", forceY((d: any) => d.y).strength(0.04))
       .force(
@@ -129,12 +138,21 @@ function useTieredForceLayout(nodes: GraphNode[], edges: { source: string; targe
 
     // x is pinned per tier, so the sim only nudges nodes vertically and links
     // can reorder or overlap them. Re-lay each column deterministically in
-    // codebook order (T7a.1 → T7a.2 → … → T7c.2), top to bottom, size-agnostic:
-    // stack edge-to-edge and share the leftover height as an even inter-node
-    // gap (all tiers currently have positive slack, so no overlap). The sim
-    // result is discarded for y.
+    // codebook order (T7a.1 → T7a.2 → … → T7c.2), top to bottom. Every node
+    // shows a title, so each reserves LABEL_H and columns share the leftover
+    // height as an even inter-node gap (≥ MIN_GAP, capped at MAX_GAP). The
+    // tallest tier sets the SVG height so no title can clip off the bottom.
+    // The sim result is discarded for y.
+    const labelTotalForTier = (list: any[]) => list.length * LABEL_H;
+    const neededByTier = Object.values(byTier).map((list: any[]) => {
+      if (list.length <= 1) return labelTotalForTier(list);
+      const diam = list.reduce((s: number, n: any) => s + 2 * radius(n), 0);
+      return diam + labelTotalForTier(list) + MIN_GAP * (list.length - 1);
+    });
+    const svgH = Math.max(VIEW_H, TOP_MARGIN + 16 + Math.ceil(Math.max(1, ...neededByTier)));
+
     const bandTop = TOP_MARGIN;
-    const bandBottom = height - 16;
+    const bandBottom = svgH - 16;
     const MAX_GAP = 44;
     Object.values(byTier).forEach((list) => {
       const colNodes = list
@@ -148,18 +166,23 @@ function useTieredForceLayout(nodes: GraphNode[], edges: { source: string; targe
       }
 
       const diameters = colNodes.reduce((s: number, n: any) => s + 2 * radius(n), 0);
-      const gap = Math.min(MAX_GAP, (bandBottom - bandTop - diameters) / (colNodes.length - 1));
+      const labelTotal = labelTotalForTier(colNodes);
+      const gap = Math.max(
+        0,
+        Math.min(MAX_GAP, (bandBottom - bandTop - diameters - labelTotal) / (colNodes.length - 1))
+      );
       // centre the stack in the band (it may not use the full height once gap is capped)
-      const usedH = diameters + gap * (colNodes.length - 1);
+      const usedH = diameters + labelTotal + gap * (colNodes.length - 1);
       let cursor = bandTop + Math.max(0, (bandBottom - bandTop - usedH) / 2);
-      for (const n of colNodes) {
+      for (let i = 0; i < colNodes.length; i++) {
+        const n = colNodes[i];
         n.y = cursor + radius(n);
-        cursor += 2 * radius(n) + gap;
+        cursor += 2 * radius(n) + LABEL_H + gap;
       }
     });
 
-    return { nodes: simNodes, links: simLinks, radius, colX };
-  }, [nodes, edges, width, height]);
+    return { nodes: simNodes, links: simLinks, radius, colX, height: svgH };
+  }, [nodes, edges, width]);
 }
 
 type HarmMechanismMapProps = {
@@ -181,7 +204,28 @@ export const HarmMechanismMap = ({
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [pinnedId, setPinnedId] = useState<string | null>(null);
   const [focusedId, setFocusedId] = useState<string | null>(null);
-  const activeId = hoveredId || pinnedId;
+  // A pinned selection owns the dimming: once pinned, hovering another node
+  // must NOT re-shuffle the bright neighbourhood (that left the previously
+  // selected node + its links lit). While unpinned, hover takes over.
+  const activeId = pinnedId ?? hoveredId;
+
+  // The eight tier columns should all fit inside the panel on any screen: the
+  // map adapts its layout to the container width (capped at the 1040 design
+  // width; floored at 640 so column circles/labels stay readable on phones,
+  // where a horizontal nudge is acceptable).
+  const [layoutWidth, setLayoutWidth] = useState(VIEW_W);
+  useLayoutEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const measure = () => {
+      const w = el.clientWidth;
+      if (w > 0) setLayoutWidth(Math.max(MIN_W, Math.min(VIEW_W, w)));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const { nodes: graphNodes, edges } = useMemo(() => {
     const freq: Record<string, number> = {};
@@ -213,7 +257,7 @@ export const HarmMechanismMap = ({
 
   const nodeById = useMemo(() => new Map(graphNodes.map((n) => [n.id, n])), [graphNodes]);
 
-  const { nodes: laidOut, links, radius, colX } = useTieredForceLayout(graphNodes, edges, VIEW_W, VIEW_H);
+  const { nodes: laidOut, links, radius, colX, height: svgH } = useTieredForceLayout(graphNodes, edges, layoutWidth);
 
   const neighborSet = useMemo(() => {
     if (!activeId) return null;
@@ -225,17 +269,37 @@ export const HarmMechanismMap = ({
     return s;
   }, [activeId, links]);
 
+  // Selecting a node (hover or pin) greys out everything that isn't the node
+  // or one of its direct links, so the surrounding context stays readable.
+  const dimSet = neighborSet;
+
   const visibleLinks = useMemo(() => {
     if (activeId) return links.filter((l) => l.source.id === activeId || l.target.id === activeId);
     return links.filter((l) => l.weight >= MIN_VISIBLE_WEIGHT);
   }, [links, activeId]);
 
   const handleSvgClick = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (e.target === e.currentTarget) setPinnedId(null);
+    if (e.target === e.currentTarget) resetViz();
   };
 
-  const activeNode = laidOut.find((n) => n.id === activeId);
-  const rMax = Math.max(1, ...laidOut.map((n) => radius(n)));
+  // Clicking anywhere on the map background (outside a node) reverts the viz
+  // to its load state: no selection, all nodes & titles at full strength.
+  const resetViz = () => {
+    setPinnedId(null);
+    setHoveredId(null);
+  };
+
+  // The tooltip follows the node under the cursor (or the pinned one), so a
+  // pin doesn't freeze the hover tip.
+  const tooltipId = hoveredId ?? pinnedId;
+  const tooltipNode = laidOut.find((n) => n.id === tooltipId);
+
+  // Column width drives how many chars a label can hold before it would bleed
+  // into the neighbouring tier's nodes; shrink the wrap budget as the panel
+  // gets narrower so every title stays inside its own column.
+  const colWidthW = (layoutWidth - MARGIN * 2) / TIER_ORDER.length;
+  const tierHeaderChars = Math.max(5, Math.min(13, Math.floor((colWidthW - 8) / 6.4)));
+  const labelChars = Math.max(7, Math.min(16, Math.floor((colWidthW - 12) / 5.4)));
 
   const legendGroups = useMemo(
     () =>
@@ -254,12 +318,12 @@ export const HarmMechanismMap = ({
 
   return (
     <VizPanelCard id="viz-harm-mechanism-map" title={title} highlights={["mechanisms", "harming democracy"]} note={note}>
-      <div ref={wrapRef} className="relative mt-2 overflow-x-auto" style={{ minHeight: VIEW_H }}>
+      <div ref={wrapRef} className="relative mt-2 overflow-x-auto" style={{ minHeight: svgH }} onClick={resetViz}>
         <svg
-          width="100%"
-          height={VIEW_H}
-          viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
-          style={{ display: "block", minWidth: VIEW_W }}
+          width={layoutWidth}
+          height={svgH}
+          viewBox={`0 0 ${layoutWidth} ${svgH}`}
+          style={{ display: "block", margin: "0 auto" }}
           onClick={handleSvgClick}
           role="img"
           aria-label={TITLE}
@@ -283,7 +347,7 @@ export const HarmMechanismMap = ({
                     {TIER_CODE[tier as keyof typeof TIER_CODE]}
                   </text>
                   <text x={x} y={46} textAnchor="middle" fontSize={11} fontWeight={600} fill="#5C5C52">
-                    {wrapLabelLines(TIER_SHORT[tier], 13, 2).map((line, li) => (
+                    {wrapLabelLines(TIER_SHORT[tier], tierHeaderChars, 2).map((line, li) => (
                       <tspan key={li} x={x} dy={li === 0 ? 0 : 12}>
                         {line}
                       </tspan>
@@ -307,7 +371,7 @@ export const HarmMechanismMap = ({
 
             {laidOut.map((n) => {
               const r = radius(n);
-              const dim = neighborSet && !neighborSet.has(n.id);
+              const dim = dimSet && !dimSet.has(n.id);
               const isActive = activeId === n.id;
               const isFocus = focusedId === n.id;
               return (
@@ -334,9 +398,13 @@ export const HarmMechanismMap = ({
                     onClick={(e) => {
                       e.stopPropagation();
                       setPinnedId((p) => (p === n.id ? null : n.id));
+                      setHoveredId(null);
                     }}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") setPinnedId((p) => (p === n.id ? null : n.id));
+                      if (e.key === "Enter" || e.key === " ") {
+                        setPinnedId((p) => (p === n.id ? null : n.id));
+                        setHoveredId(null);
+                      }
                     }}
                   />
                 </g>
@@ -345,10 +413,8 @@ export const HarmMechanismMap = ({
 
             {laidOut.map((n) => {
               const r = radius(n);
-              const dim = neighborSet && !neighborSet.has(n.id);
+              const dim = dimSet && !dimSet.has(n.id);
               const isActive = activeId === n.id;
-              const showLabel = isActive || r > rMax * 0.62;
-              if (!showLabel) return null;
               const meta = nodeById.get(n.id);
               return (
                 <text
@@ -364,7 +430,7 @@ export const HarmMechanismMap = ({
                   paintOrder="stroke"
                   style={{ pointerEvents: "none" }}
                 >
-                  {wrapLabelLines(meta?.label ?? n.id, 16, 2).map((line, i) => (
+                  {wrapLabelLines(meta?.label ?? n.id, labelChars, 2).map((line, i) => (
                     <tspan key={i} x={n.x} dy={i === 0 ? 0 : 11}>
                       {line}
                     </tspan>
@@ -375,12 +441,12 @@ export const HarmMechanismMap = ({
           </g>
         </svg>
 
-        {activeNode && (
+        {tooltipNode && (
           <VizTooltip
             variant="dark"
-            title={`${activeNode.id} — ${nodeById.get(activeNode.id)?.label ?? activeNode.id}`}
-            description={harmTaxonomy.codes[activeNode.id]?.description}
-            count={`${formatCount(activeNode.value)} entries coded`}
+            title={`${tooltipNode.id} — ${nodeById.get(tooltipNode.id)?.label ?? tooltipNode.id}`}
+            description={harmTaxonomy.codes[tooltipNode.id]?.description}
+            count={`${formatCount(tooltipNode.value)} entries coded`}
             left={10}
             top={10}
           />
