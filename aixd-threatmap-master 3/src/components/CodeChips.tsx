@@ -31,7 +31,7 @@ export const CodeChips = ({
   descriptionOf,
   max = 3,
   maxWidth = "100%",
-  emptyLabel = "—",
+  emptyLabel = "–",
 }: CodeChipsProps) => {
   if (!codes || codes.length === 0) {
     return (
@@ -53,9 +53,9 @@ export const CodeChips = ({
         const chip = (
           <span
             key={code}
-            title={hasHover ? undefined : name && name !== code ? `${code} — ${name}` : code}
+            title={hasHover ? undefined : name && name !== code ? `${code} – ${name}` : code}
             // Wraps onto a second line instead of truncating with an
-            // ellipsis — maxWidth now bounds the wrap, not a hard cut.
+            // ellipsis – maxWidth now bounds the wrap, not a hard cut.
             className="inline-block whitespace-normal break-words rounded-[10px] px-[7px] py-[3px] text-[10.5px] font-semibold leading-snug"
             style={{
               maxWidth,

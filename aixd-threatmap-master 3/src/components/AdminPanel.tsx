@@ -122,7 +122,7 @@ export const AdminPanel = () => {
     setPat("");
     setSavedPat("");
     setQRows([]);
-    setMsg("Disconnected — token cleared from this session");
+    setMsg("Disconnected – token cleared from this session");
     setTimeout(() => setMsg(null), 1800);
   };
 
@@ -186,7 +186,7 @@ export const AdminPanel = () => {
       const f = await ghGetFile(owner, repo, "data/questions.csv", branch, pat);
       const rows = (Papa.parse(f?.content ?? "", { header: true, skipEmptyLines: true }).data as any[]).filter((x) => x.question);
       const hit = rows.find((x) => x.timestamp === r.timestamp);
-      if (!hit) throw new Error("Row no longer in file — reload and retry");
+      if (!hit) throw new Error("Row no longer in file – reload and retry");
       hit.status = status;
       hit.answer = status === "new" ? "" : draftAnswer.trim();
       hit.answeredAt = status === "new" ? "" : new Date().toISOString();
@@ -281,7 +281,7 @@ export const AdminPanel = () => {
       await ghPutFile(owner, repo, "public/data/aspects.json", branch, pat, aspectsContent, aspectsFile?.sha ?? null, "chore: update codebook aspects.json via admin");
       const rawFile = await ghGetFile(owner, repo, "data/raw/codebook.csv", branch, pat);
       await ghPutFile(owner, repo, "data/raw/codebook.csv", branch, pat, csvContent, rawFile?.sha ?? null, "chore: update codebook.csv via admin");
-      setMsg("Published aspects.json + codebook.csv — the deploy Action will rebuild GitHub Pages.");
+      setMsg("Published aspects.json + codebook.csv – the deploy Action will rebuild GitHub Pages.");
     } catch (e: any) {
       setErr(e.message);
     } finally {
@@ -344,7 +344,7 @@ export const AdminPanel = () => {
                   key={n.id}
                   onClick={() => !n.soon && setTab(n.id)}
                   disabled={n.soon}
-                  title={n.soon ? "In development — disabled for this review" : undefined}
+                  title={n.soon ? "In development – disabled for this review" : undefined}
                   className={`flex w-full items-center justify-between border-l-2 px-3.5 py-2.5 text-left text-sm transition-colors ${
                     n.soon
                       ? "cursor-not-allowed border-transparent text-muted-foreground/60"
@@ -404,7 +404,7 @@ export const AdminPanel = () => {
             <div className="flex items-start gap-2 rounded-lg border border-p4d-blue/40 bg-p4d-blue/10 px-3.5 py-2.5 text-sm text-foreground">
               <span aria-hidden>◆</span>
               <span>
-                <b>Demo preview.</b> Showing bundled sample data — reading is live, saving is disabled. Connect a GitHub token to work against the
+                <b>Demo preview.</b> Showing bundled sample data – reading is live, saving is disabled. Connect a GitHub token to work against the
                 real <code className="rounded bg-muted px-1">data/questions.csv</code>. This console is for review only until P4D signs off.
               </span>
             </div>
@@ -437,7 +437,7 @@ export const AdminPanel = () => {
                   <p className="mt-0.5 text-[12px] text-muted-foreground">
                     Appends <code className="rounded bg-muted px-1">timestamp,question,page,ua</code> to{" "}
                     <code className="rounded bg-muted px-1">data/questions.csv</code> and commits. The public question box writes here too when a PAT is in this session.
-                    {qSource === "sample" && " No PAT connected — showing the bundled sample file."}
+                    {qSource === "sample" && " No PAT connected – showing the bundled sample file."}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -471,7 +471,7 @@ export const AdminPanel = () => {
                     ) : qSource === "sample" ? (
                       <span className="text-p4d-orange">Sample</span>
                     ) : (
-                      "—"
+                      "–"
                     )
                   }
                 />
@@ -552,11 +552,11 @@ export const AdminPanel = () => {
                                       </div>
                                       <div>
                                         <div className="font-semibold uppercase tracking-wide text-muted-foreground">Page</div>
-                                        <div className="font-mono">{r.page || "—"}</div>
+                                        <div className="font-mono">{r.page || "–"}</div>
                                       </div>
                                       <div>
                                         <div className="font-semibold uppercase tracking-wide text-muted-foreground">Answered</div>
-                                        <div className="font-mono">{r.answeredAt ? new Date(r.answeredAt).toLocaleDateString() : "—"}</div>
+                                        <div className="font-mono">{r.answeredAt ? new Date(r.answeredAt).toLocaleDateString() : "–"}</div>
                                       </div>
                                     </div>
                                     <div className="mt-2 truncate text-[10px] text-muted-foreground" title={r.ua}>{r.ua}</div>
@@ -608,7 +608,7 @@ export const AdminPanel = () => {
                                       </button>
                                     </div>
                                     {!connected && (
-                                      <p className="mt-2 text-[11px] text-p4d-orange">Read-only — connect a PAT to save. The submitter left no contact, so responses are stored in the CSV (e.g. for a public FAQ), not emailed.</p>
+                                      <p className="mt-2 text-[11px] text-p4d-orange">Read-only – connect a PAT to save. The submitter left no contact, so responses are stored in the CSV (e.g. for a public FAQ), not emailed.</p>
                                     )}
                                   </div>
                                 </td>
@@ -652,7 +652,7 @@ export const AdminPanel = () => {
                     />
                     <StatCard
                       label="Diff vs live"
-                      value={cbCurrent ? `${Object.keys(cbCurrent).length} → ${cbParsed.length}` : "—"}
+                      value={cbCurrent ? `${Object.keys(cbCurrent).length} → ${cbParsed.length}` : "–"}
                     />
                   </div>
                 )}
@@ -660,10 +660,10 @@ export const AdminPanel = () => {
                 {cbCurrent && cbParsed && (
                   <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-[11px] text-muted-foreground">
                     <span>
-                      <b className="text-p4d-grassroot">Added:</b> {cbAdded.join(", ") || "—"}
+                      <b className="text-p4d-grassroot">Added:</b> {cbAdded.join(", ") || "–"}
                     </span>
                     <span>
-                      <b className="text-p4d-brick">Removed:</b> {cbRemoved.join(", ") || "—"}
+                      <b className="text-p4d-brick">Removed:</b> {cbRemoved.join(", ") || "–"}
                     </span>
                   </div>
                 )}

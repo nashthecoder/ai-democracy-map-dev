@@ -36,7 +36,7 @@ export const HM2_CLUSTERS: HmCluster[] = [
 ];
 
 // Pillars 1/2 are the P4D brick/grassroot tokens. Pillars 3/4 use darkened
-// blue/olive of the P4D blue/lime hues — these render as small text/dots here,
+// blue/olive of the P4D blue/lime hues – these render as small text/dots here,
 // where the light brand values (#92C2FF / #D9E021) would fail contrast.
 export const HM2_DA_PILLAR: Record<string, string> = {
  "1": "#963735",

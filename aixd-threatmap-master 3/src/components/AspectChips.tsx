@@ -71,7 +71,7 @@ const Chip = ({
             codeOnly
               ? "whitespace-nowrap font-mono"
               : compact
-                ? // Base Badge is a fixed h-5 (20px) — fine for one line, but
+                ? // Base Badge is a fixed h-5 (20px) – fine for one line, but
                   // compact mode wraps long aspect names onto 2 lines, and a
                   // 20px box squeezes those lines into and over each other.
                   // Releasing the height + adding real vertical padding and
@@ -117,7 +117,7 @@ export const AspectChips = ({
   const [extraHide, setExtraHide] = useState(0);
 
   // After render, measure each visible chip's right edge against the gradient start.
-  // Chips bleeding into the fade zone are hidden — their count rolls into +N.
+  // Chips bleeding into the fade zone are hidden – their count rolls into +N.
   // Uses parentElement as reference so measurement is stable even as chips are removed.
   // Deps exclude extraHide intentionally: effect runs once per codes/maxVisible change,
   // measures the current DOM, and converges in a single correction before browser paint.
@@ -164,7 +164,7 @@ export const AspectChips = ({
         </span>
       ))}
       {overflowCount > 0 && (
-        // No stopPropagation — click bubbles to row toggle, opening ExpandedRow
+        // No stopPropagation – click bubbles to row toggle, opening ExpandedRow
         // where all chips are visible (maxVisible={99}, no height constraint)
         <button type="button">
           <Badge

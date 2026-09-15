@@ -1,4 +1,4 @@
-// Shimmer skeleton for IntroSection — mirrors the exact layout/spacing of the real component.
+// Shimmer skeleton for IntroSection – mirrors the exact layout/spacing of the real component.
 // Uses .animate-shimmer from globals.css instead of animate-pulse.
 
 // ─── Data overview box skeleton ───────────────────────────────────────────────
@@ -32,7 +32,7 @@ const SkeletonPillarColumn = () => (
       <div className="mt-1 size-2 shrink-0 rounded-full animate-shimmer" />
       <div className="h-3 w-full animate-shimmer rounded" />
     </div>
-    {/* count — matches text-4xl font-bold */}
+    {/* count – matches text-4xl font-bold */}
     <div className="h-10 w-8 animate-shimmer rounded" />
     {/* aspect chip badges */}
     <div className="flex flex-wrap gap-1.5">

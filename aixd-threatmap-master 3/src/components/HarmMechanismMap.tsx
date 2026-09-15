@@ -444,7 +444,7 @@ export const HarmMechanismMap = ({
         {tooltipNode && (
           <VizTooltip
             variant="dark"
-            title={`${tooltipNode.id} — ${nodeById.get(tooltipNode.id)?.label ?? tooltipNode.id}`}
+            title={`${tooltipNode.id} – ${nodeById.get(tooltipNode.id)?.label ?? tooltipNode.id}`}
             description={harmTaxonomy.codes[tooltipNode.id]?.description}
             count={`${formatCount(tooltipNode.value)} entries coded`}
             left={10}

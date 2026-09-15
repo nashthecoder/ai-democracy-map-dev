@@ -21,7 +21,7 @@ const benefitNameOf = (code: string, taxonomy?: BenefitTaxonomy) =>
 // Canonical public-facing label from the taxonomy codebooks ("accessible label"
 // column 7 of CODEBOOKS), i.e. the readable name used in the table, expanded
 // rows and filters. The legacy mock label maps (HM2_L / HM2_BEN_NAME) hold a
-// mix of old sub-cluster names and new accessible ones — all map panels must
+// mix of old sub-cluster names and new accessible ones – all map panels must
 // resolve through this first so nothing stale leaks out.
 const accessibleLabelOf = (
   code: string,

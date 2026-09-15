@@ -55,7 +55,7 @@ export const VizLegend = ({
               key={i}
               tabIndex={actionable ? 0 : undefined}
               role={actionable ? "button" : undefined}
-              aria-label={actionable ? `${g.label} — ${g.description ?? "Sub-codes"}` : undefined}
+              aria-label={actionable ? `${g.label} – ${g.description ?? "Sub-codes"}` : undefined}
               onMouseEnter={
                 actionable
                   ? (e) =>

@@ -16,7 +16,11 @@ import {
   type Row,
 } from "@tanstack/react-table";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Info, ExternalLink } from "lucide-react";
+// Client request (2026-09-14): the aspects-of-democracy codebook page link in
+// the Aspects header is commented out ("saved as draft") until its content is
+// finalised. Re-import ExternalLink when the link is restored.
+import { Info } from "lucide-react";
+// import { ExternalLink } from "lucide-react";
 import { TypeBadge } from "@/components/TypeBadge";
 import { AspectChips } from "@/components/AspectChips";
 import { CodeChips } from "@/components/CodeChips";
@@ -42,7 +46,7 @@ const COLUMN_INFO: Record<string, { title: string; description: string }> = {
   aspects: {
     title: "Democracy aspects involved",
     description:
-      "Links each entry to one or more dimensions of the P4Democracy assessment framework — from citizenship and rights to civil society and democratic governance.",
+      "Links each entry to one or more dimensions of the P4Democracy assessment framework – from citizenship and rights to civil society and democratic governance.",
   },
   description: {
     title: "Threat description",
@@ -122,7 +126,7 @@ const ELEVATION_SHADOW: Record<ItemType, string> = {
   "independent-opportunity": "inset 0 1px 0 0 rgba(0,177,64,0.2), inset 0 -1px 0 0 rgba(0,177,64,0.2)",
 };
 
-// Tween easing — clean, no overshoot. Material Design standard curve (0.4 0 0.2 1).
+// Tween easing – clean, no overshoot. Material Design standard curve (0.4 0 0.2 1).
 const EXPAND_TRANSITION = {
   height: { type: "tween" as const, duration: 0.25, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] },
   opacity: { duration: 0.2 },
@@ -230,7 +234,7 @@ export const DataTable = ({
   const [visibleCount, setVisibleCount] = useState(INITIAL_BATCH);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  // Aspect codes the table is currently filtered by — surfaced first in each
+  // Aspect codes the table is currently filtered by – surfaced first in each
   // row's "Democracy aspects" cell so the reason a row matched is never hidden
   // in the "+N" overflow.
   const activeAspectCodes = useMemo(() => {
@@ -270,6 +274,8 @@ export const DataTable = ({
         header: () => (
           <div className="flex items-center gap-1.5">
             <ColumnHeader columnId="aspects" />
+            {/* Codebook (aspects-of-democracy) link commented out per client
+                request (2026-09-14) – draft saved, hidden until finalised.
             <a
               href={`${import.meta.env.BASE_URL}/codebook.html`}
               target="_blank"
@@ -279,6 +285,7 @@ export const DataTable = ({
             >
               <ExternalLink className="size-3" />
             </a>
+            */}
           </div>
         ),
         cell: ({ row }) => (
@@ -296,11 +303,11 @@ export const DataTable = ({
           if (row.original.type === "independent-opportunity") {
             return (
               <span className="text-[12px] italic tracking-wider text-p4d-grassroot/70">
-                — opportunity —
+                – opportunity –
               </span>
             );
           }
-          // Stays clamped even when the row is expanded — the expanded panel
+          // Stays clamped even when the row is expanded – the expanded panel
           // below is the single place for full text (verbatim quote, or the
           // paraphrase itself if no verbatim exists). The row is always just
           // the compact summary, so expanding never reflows it.
@@ -600,7 +607,7 @@ export const DataTable = ({
                                   {/* Full names once the column is wide enough (xl); on
                                       narrower widths show the beginning of the name,
                                       truncating with an ellipsis as the window shrinks
-                                      (so it's obvious a wider screen reveals more) — the
+                                      (so it's obvious a wider screen reveals more) – the
                                       full name is on hover and in the expanded row. */}
                                   <div
                                     className="hidden overflow-hidden xl:flex xl:items-center"
@@ -617,7 +624,7 @@ export const DataTable = ({
                                     />
                                   </div>
                                   <div className="flex min-w-0 flex-wrap items-center xl:hidden [&_*]:min-w-0 [&>*]:min-w-0">
-                                    {/* Below xl the column is only ~50-70px wide — too
+                                    {/* Below xl the column is only ~50-70px wide – too
                                         narrow for full names at any padding. codeOnly
                                         keeps each pill to its short code ("2.1"), which
                                         actually fits; full name + pillar + description

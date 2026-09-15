@@ -2,7 +2,7 @@
 
 // Short descriptions for the carousel legend hover boxes. Text is verbatim
 // from the client codebook workbook "3_UPDATED_SHORT LABELS&DESCR_harms and
-// pro-dem mechanisms.xlsx", Sheet1 — column J ("Short description"), with the
+// pro-dem mechanisms.xlsx", Sheet1 – column J ("Short description"), with the
 // column-K fallback where a J cell was empty.
 
 // Harm tiers, keyed by the harm-taxonomy tier ids (tier0–tier7).
@@ -46,7 +46,7 @@ export const PATHWAY_CLUSTER_DESC: Record<string, string> = {
 // docs/code_descriptions.md (pillar-level definitions).
 export const ASPECT_PILLAR_DESC: Record<string, string> = {
   "1":
-    "Concerns the rights of citizens and the state's ability to guarantee equal rights through constitutional and legal processes — including civil, political, economic and social rights.",
+    "Concerns the rights of citizens and the state's ability to guarantee equal rights through constitutional and legal processes – including civil, political, economic and social rights.",
   "2":
     "Concerns the institutions and processes of representative and accountable government: electoral processes and political parties; the effectiveness, transparency, and integrity of public administration, legislature and judiciary; civilian control of security forces; and the absence of illegitimate influence on policy-making.",
   "3":

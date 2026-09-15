@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from "react";
 
 // Shared pan/zoom for map panels, ported from the client mock's useSvgPanZoom:
 // wheel zoom, drag-pan with a 4px movement threshold, and the drag-vs-click
-// fix — a synthetic click fired after a real drag is swallowed so it never
+// fix – a synthetic click fired after a real drag is swallowed so it never
 // triggers a spurious box/link selection.
 export function useSvgPanZoom(minScale = 0.5, maxScale = 4) {
   const [panZoom, setPanZoom] = useState({ x: 0, y: 0, scale: 1 });

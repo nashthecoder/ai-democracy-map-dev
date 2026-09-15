@@ -13,17 +13,17 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 
 // 1040 originally left only 10px between the DA-chip column's right edge
-// (HM2B_DAX + HM2B_DAW = 848 + 182 = 1030) and the canvas boundary — the
+// (HM2B_DAX + HM2B_DAW = 848 + 182 = 1030) and the canvas boundary – the
 // chips read as flush against the panel edge. Widening the canvas (rather
 // than shrinking the chips or shifting them left) adds real right padding
 // without touching anything else's position. Widened another 40px on top of
 // that (1070 → 1110) to make room for the wider Capability uses → Targeted
-// use gap below — the connecting arrows sat almost flush against both node
+// use gap below – the connecting arrows sat almost flush against both node
 // edges (only ~2px of real gap) with barely any room to read as curves.
 const VIEW_W = 1110;
 // The canvas matches this panel's own content: the three bands plus their
 // header fill the height with a small bottom margin. Height was bumped from
-// 480 to 552 so lanes get real height — 40px+ per row instead of a squeeze —
+// 480 to 552 so lanes get real height – 40px+ per row instead of a squeeze –
 // which lets node pills grow to 34px and carry a third text line, cutting the
 // "…" truncations to only the longest labels.
 const VIEW_H = 552;
@@ -31,7 +31,7 @@ const VIEW_H = 552;
 // Geometry rescaled from the colleague's original 430px-tall layout to this
 // site's map height, matching the client mock's panels.
 // T5-T7 shifted +40 from their original positions (604/698/782 → 644/738/822)
-// to open up the Capability uses (T4) → Targeted use (T5) gap specifically —
+// to open up the Capability uses (T4) → Targeted use (T5) gap specifically –
 // that pair's node edges sat only ~2px apart, leaving the connecting curves
 // no real room to bow into and read as distinct arrows. The gaps among
 // T5-T6-T7 themselves are unchanged; they all just moved together.
@@ -43,15 +43,15 @@ const HM2B_CLUS_X: [number, number][] = [
   [696, 878],
 ];
 const HM2B_DAX = 888;
-// Chip width — kept 12px inside the band card's own right edge (which sits
+// Chip width – kept 12px inside the band card's own right edge (which sits
 // at HM2B_DAX + HM2B_DAW + 12) rather than flush against it.
 const HM2B_DAW = 170;
 // Band geometry scaled from the colleague's original 400px-tall layout and
 // then re-flowed for a 552px canvas: card heights are sized to each band's
 // lane count (4 / 2 / 2 lanes) with ~14px gaps between cards and a real
 // margin under the header chips. The third band (Lock-in & power
-// concentration) is the tightest — the "Rules for building AI" pills at
-// lane 0 sit directly under the band title — so it gets extra height to grow
+// concentration) is the tightest – the "Rules for building AI" pills at
+// lane 0 sit directly under the band title – so it gets extra height to grow
 // lane height to 48px and keep the first-row pills ~4px clear of the title's
 // descenders instead of kissing them.
 const HM2B_BAND = [
@@ -73,7 +73,7 @@ const HM2B_VLINE_BOTTOM = 540;
 
 const TITLE = "Through which pathways does the literature link AI to harm for democracy?";
 const NOTE =
-  "* as mentioned in the sources (the data collected does not include information on which threats and mitigations are more impactful). Bands are recurring pathways; numbers count entries asserting that step within a single statement — recurring claims in the literature, not verified causation.";
+  "* as mentioned in the sources (the data collected does not include information on which threats and mitigations are more impactful). Bands are recurring pathways; numbers count entries asserting that step within a single statement – recurring claims in the literature, not verified causation. Other pathways can be drawn from the data besides those visualised here.";
 
 const hm2Lbl = (c: string, tax?: HarmTaxonomy) =>
   accessibleLabelOf(c, tax, undefined) ?? HM2_TIER_SHORT[c] ?? c;
@@ -125,7 +125,7 @@ export const PathwayBandsMap = ({
       rect
     );
   // Democracy-aspect chip names truncate hard in the ~150px column ("Opinion
-  // Formation and Political…") — hover reveals the full name plus the same
+  // Formation and Political…") – hover reveals the full name plus the same
   // mention count the click detail below shows, using the panel's existing
   // hover-tip mechanism (already wired up for the cluster headers above).
   const openDATip = (code: string, name: string, count: number, total: number, pathway: string, rect: DOMRect, bounds?: DOMRect) =>
@@ -135,7 +135,7 @@ export const PathwayBandsMap = ({
         description: `Mentioned in ${formatCount(count)} of ${formatCount(total)} entries in the pathway "${pathway}".`,
       },
       rect,
-      // These chips are stacked tightly in a column — dropping the tip
+      // These chips are stacked tightly in a column – dropping the tip
       // above/below (the default) covers the hovered chip and its neighbour.
       // Placing it to the right instead keeps every pill in the column clear.
       "right",
@@ -144,7 +144,7 @@ export const PathwayBandsMap = ({
       bounds
     );
   const lbl = (c: string) => hm2Lbl(c, harmTaxonomy);
-  // The clicked (filterable) code — highlighted in the diagram + legend.
+  // The clicked (filterable) code – highlighted in the diagram + legend.
   const selCode = filterTarget?.codes[0] ?? null;
   const selPillar = filterTarget?.key === "aspect" ? selCode?.[0] ?? null : null;
 
@@ -158,6 +158,7 @@ export const PathwayBandsMap = ({
       title={TITLE}
       highlights={["pathways", "harm for democracy"]}
       note={NOTE}
+      noteItalic
     >
       <div className="relative mt-2 overflow-x-auto" style={{ minHeight: VIEW_H }}>
         <svg
@@ -201,7 +202,7 @@ export const PathwayBandsMap = ({
                       line: Context, Properties and capabilities and AI model
                       use fit their columns and share a single baseline, while
                       Downstream social dynamics wraps onto a distinct second
-                      row — same title weight, a real line break, still above
+                      row – same title weight, a real line break, still above
                       the tier sub-title chips. */}
                   <text
                     x={mid}
@@ -219,12 +220,12 @@ export const PathwayBandsMap = ({
                     ))}
                   </text>
                   {/* Skip the per-tier chip label when a cluster has only one
-                      tier — e.g. "Context" (T0 alone), whose tier short name
+                      tier – e.g. "Context" (T0 alone), whose tier short name
                       is also literally "Context". With one member the group
                       title above already says it; repeating it as a chip
                       right underneath just duplicates the same word twice. */}
                   {c.tiers.length > 1 && c.tiers.map((t) => {
-                    // Tier columns are only 84–112px apart — at the old 11-char
+                    // Tier columns are only 84–112px apart – at the old 11-char
                     // budget nearly every name fractured into two lines ("AI" /
                     // "capabilities") at mixed baselines, so the sub-title row
                     // read as ragged fragments. 17 lets all but the longest
@@ -248,7 +249,7 @@ export const PathwayBandsMap = ({
 
             <line x1={HM2B_DAX - 8} y1={6} x2={HM2B_DAX - 8} y2={HM2B_VLINE_BOTTOM} stroke="#D6D6CA" strokeWidth={1} />
             {/* Centred over the democracy-affected column like the cluster headings
-                over theirs — the header row treats it as a fifth column even
+                over theirs – the header row treats it as a fifth column even
                 though its pills are left-anchored. Wraps like the Downstream
                 social dynamics title because its full name is too wide for
                 the column. */}
@@ -275,7 +276,7 @@ export const PathwayBandsMap = ({
                   {/* The accent bar's own rx (2.5) is far tighter than the
                       card's (14), so near the top/bottom the card's edge has
                       already curved inward while the bar's corners are still
-                      almost square — the bar's corners poke out past where
+                      almost square – the bar's corners poke out past where
                       the card's own rounded silhouette has receded to,
                       reading as a separate pill glued on top rather than an
                       inset border. Clipping the bar to the card's own
@@ -286,10 +287,10 @@ export const PathwayBandsMap = ({
                   <rect x={10} y={b.top - 16} width={1060} height={b.h} rx={14} fill={fi % 2 ? "#FBFBF3" : "#F7F7EE"} stroke="#E4E4D6" strokeWidth={1} />
                   <rect x={10} y={b.top - 16} width={5} height={b.h} fill="#963735" opacity={0.75} clipPath={`url(#band-clip-${fi})`} />
                   {/* Band title sits right under the rounded card's top edge
-                      (rect starts at b.top-16) — nudged down from the previous
+                      (rect starts at b.top-16) – nudged down from the previous
                       b.top-4 to b.top+2 for real breathing room above the text.
                       Title + count are one <text> with the count as a tspan
-                      so the browser lays out real glyph widths — the old
+                      so the browser lays out real glyph widths – the old
                       two-<text> version positioned the count by estimating
                       the title's pixel width from its character count, which
                       undershot for longer titles and ran the count straight
@@ -305,7 +306,7 @@ export const PathwayBandsMap = ({
                   {/* Node columns can sit as little as ~2px apart edge-to-edge
                       (e.g. Capability uses → Targeted use), so however a
                       curve between them is bent, there's essentially no gap
-                      to bend it INTO — any curviness just cranks up inside
+                      to bend it INTO – any curviness just cranks up inside
                       that same sliver of space. The actual fix for several
                       links sharing one node: today every sibling starts (or
                       ends) at that node's exact center, so they're born from
@@ -330,7 +331,7 @@ export const PathwayBandsMap = ({
                     // of how tight the column gap is (some are only a couple
                     // of px edge-to-edge). Scaling this down to the gap
                     // seemed safer on paper but collapsed the curve into a
-                    // near-straight, kinked line for tight columns — visibly
+                    // near-straight, kinked line for tight columns – visibly
                     // worse. The pill nodes render after (below) these paths,
                     // so a control point reaching past a neighbour's edge is
                     // simply hidden under that pill's opaque fill, not a
@@ -346,7 +347,7 @@ export const PathwayBandsMap = ({
                           <b>
                             {lbl(sg.a)} → {lbl(sg.b)}
                           </b>{" "}
-                          — asserted together in <b>{formatCount(sg.n)} entries</b>. Pathway: {f.name}.
+                          – asserted together in <b>{formatCount(sg.n)} entries</b>. Pathway: {f.name}.
                         </>
                       );
                     };
@@ -415,7 +416,7 @@ export const PathwayBandsMap = ({
                           <b>
                             {lbl(n.c)} ({n.c})
                           </b>{" "}
-                          — {t ? HM2_TIER_SHORT[t] : ""}
+                          – {t ? HM2_TIER_SHORT[t] : ""}
                           {clusterName ? `, in ${clusterName}.` : "."}
                         </>
                       );
@@ -481,7 +482,7 @@ export const PathwayBandsMap = ({
                     const y = b.top + 2 + di * step + step / 2;
                     // Three rows now (code+count, then the name wrapped over
                     // up to 2 lines) instead of hard-truncating the name to
-                    // one line — with the old single-line truncation, every
+                    // one line – with the old single-line truncation, every
                     // aspect name in this column cut off mid-word. Text-row
                     // offsets below are fixed regardless of hh, so extra
                     // room (when a band has fewer chips) becomes genuine
@@ -501,7 +502,7 @@ export const PathwayBandsMap = ({
                           <b>
                             {d[0]} {HM2_DA_NAME[d[0]] || d[0]}
                           </b>{" "}
-                          — mentioned in <b>{formatCount(d[1])} of {formatCount(f.units)} entries</b> in the pathway "{f.name}".
+                          – mentioned in <b>{formatCount(d[1])} of {formatCount(f.units)} entries</b> in the pathway "{f.name}".
                         </>
                       );
                     };
@@ -543,7 +544,7 @@ export const PathwayBandsMap = ({
                         {/* Row offsets are fixed (not scaled to hh) so extra
                             pill height becomes real padding above/below the
                             text block instead of stretching the line gaps.
-                            Left/right insets bumped 9/8 → 12/12 — at the old
+                            Left/right insets bumped 9/8 → 12/12 – at the old
                             insets the code and count text sat right against
                             the pill's rx=10 rounded corners with no visible
                             margin. */}

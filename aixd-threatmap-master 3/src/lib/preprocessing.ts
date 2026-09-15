@@ -46,7 +46,7 @@ const KNOWN_ABBREVIATIONS: Record<string, string> = {
   "National Institute of Standards and Technology": "NIST",
 };
 
-// Regex patterns — identical to Python originals
+// Regex patterns – identical to Python originals
 const ASPECT_CODE_RE = /^(\d+\.\d+)/;
 const URL_RE = /https?:\/\/\S+/;
 const YEAR_PAREN_RE = /\((\d{4}(?:\/\d{4})?)\)/;
@@ -226,7 +226,7 @@ export const deriveSourceShort = (citation: string): string => {
   const hasPersonalPattern = /[A-Z][a-z\u00C0-\u00FF]+,\s*[A-Z]\./.test(authorBlock);
 
   if (!hasPersonalPattern) {
-    // Institutional author — use name as-is
+    // Institutional author – use name as-is
     const orgName = authorBlock.replace(/[.,; ]+$/, "");
     return `${orgName} (${year})`;
   }
@@ -268,7 +268,7 @@ export const parseCsvRows = (csvText: string): Record<string, string>[] => {
 
   const allRows = result.data;
 
-  // Row 0: title row — skip
+  // Row 0: title row – skip
   // Row 1: header row
   // Row 2+: data rows
   if (allRows.length < 2) return [];

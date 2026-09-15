@@ -11,7 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-// The ten frameworks referenced in the intro copy — client-supplied list,
+// The ten frameworks referenced in the intro copy – client-supplied list,
 // shown in an info popover next to "ten frameworks" rather than spelled out
 // in the paragraph itself.
 const FRAMEWORKS: { citation: string; url: string }[] = [
@@ -86,7 +86,7 @@ const useCountUp = (target: number, duration = 650, delay = 0): number => {
       const start = performance.now();
       const tick = (now: number) => {
         const progress = Math.min((now - start) / duration, 1);
-        // Linear, not eased — an ease-out curve front-loads almost the
+        // Linear, not eased – an ease-out curve front-loads almost the
         // whole count into the first fifth of the duration (e.g. Sources
         // would hit 10 by ~145ms then sit idle), which reads as a flicker
         // rather than a visible 0, 1, 2 … climb. Linear spends the full
@@ -119,7 +119,7 @@ type StatDef = {
 
 // Reading order = grid order: Sources, then Entries (equal-size lead tiles),
 // then Threats / Mitigations mapped stacked in the rightmost column.
-// Client-specified counts (Sep 2026) — hardcoded as requested.
+// Client-specified counts (Sep 2026) – hardcoded as requested.
 const STAT_DEFS: StatDef[] = [
   { label: "Sources", variant: "primary", value: 10 },
   { label: "Entries", variant: "secondary", value: 204 },
@@ -135,7 +135,7 @@ const VARIANT_STYLES: Record<
   StatVariant,
   { box: string; number: string; label: string; tone: string }
 > = {
-  // Four distinct, very light flat neutrals (beige + grey) — one per tile.
+  // Four distinct, very light flat neutrals (beige + grey) – one per tile.
   // No gradients: each tile is a single flat tone (mock STAT_TONES).
   primary: {
     box: "justify-center rounded-[14px] text-foreground",
@@ -192,7 +192,7 @@ const StatTile = ({
       <div className={`relative font-bold leading-none tabular-nums ${styles.number}`}>
         {/* Invisible spacer of the final value pins the tile to its end-size
             from mount, so the climbing count (overlaid, absolutely positioned)
-            never changes the number's width and cannot reflow the row — the
+            never changes the number's width and cannot reflow the row – the
             intro paragraph to the right holds still during the count-up. */}
         <span className="invisible">{value}</span>
         <span className="absolute inset-0" aria-hidden="true">
@@ -244,7 +244,7 @@ export const IntroSection = ({ items, aspects }: IntroSectionProps) => {
         Threats, solutions, and opportunities for democracy in the face of AI V2.0
       </h1>
 
-      {/* ── Data overview: stat tiles (left) + intro copy (right) — bare on ecru ── */}
+      {/* ── Data overview: stat tiles (left) + intro copy (right) – bare on ecru ── */}
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
         <DataOverview stats={stats} />
         <div className="flex flex-1 flex-col gap-4 sm:min-w-[320px]">
@@ -253,7 +253,7 @@ export const IntroSection = ({ items, aspects }: IntroSectionProps) => {
             opportunities for AI to improve democracy. The map is intended for anyone seeking an
             overview of which areas of democracy are affected by AI-related threats, and which
             mitigations and opportunities arise from them
-            {" "}— in particular civil society actors, researchers, and policymakers.
+            {" "}– in particular civil society actors, researchers, and policymakers.
             <br />
             Our team
             reviewed a diverse set of literature and selected ten frameworks that systematically

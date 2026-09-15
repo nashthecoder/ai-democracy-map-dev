@@ -53,7 +53,7 @@ const QUOTE_COLORS: Record<string, string> = {
   solution: "border-l-p4d-grassroot",
 };
 
-// Some entries' verbatim quote is word-for-word the paraphrase — showing
+// Some entries' verbatim quote is word-for-word the paraphrase – showing
 // both then is just the same sentence twice, not two different texts. Only
 // worth a separate blockquote when it actually adds something.
 const isSameText = (a?: string | null, b?: string | null) =>
@@ -115,11 +115,11 @@ export const ExpandedRow = ({ item, aspects, harmTaxonomy, benefitTaxonomy }: Ex
       className="space-y-5 px-6 py-5 text-sm"
       onClick={(e) => e.stopPropagation()}
     >
-      {/* This panel is the single place that shows full text — the row itself
+      {/* This panel is the single place that shows full text – the row itself
           stays clamped whether expanded or not. The full paraphrase (the
           column's own text, plain) always shows; the verbatim quote (italic,
           in a blockquote) only shows alongside it when it actually says
-          something different — for entries where the paraphrase already is
+          something different – for entries where the paraphrase already is
           the verbatim word-for-word, repeating it in quotes right below adds
           nothing but noise. */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
@@ -129,7 +129,7 @@ export const ExpandedRow = ({ item, aspects, harmTaxonomy, benefitTaxonomy }: Ex
               {item.type === "independent-opportunity" ? "Opportunity" : "Threat"} description
             </span>
             <CopyButton
-              text={`${item.descriptionVerbatim || item.description}\n\n— ${item.source}`}
+              text={`${item.descriptionVerbatim || item.description}\n\n– ${item.source}`}
             />
           </div>
           <p className="leading-relaxed text-foreground/90">{item.description}</p>
@@ -149,7 +149,7 @@ export const ExpandedRow = ({ item, aspects, harmTaxonomy, benefitTaxonomy }: Ex
                 Mitigation strategy
               </span>
               <CopyButton
-                text={`${item.solutionVerbatim || item.solution}\n\n— ${item.source}`}
+                text={`${item.solutionVerbatim || item.solution}\n\n– ${item.source}`}
               />
             </div>
             {item.solution && (

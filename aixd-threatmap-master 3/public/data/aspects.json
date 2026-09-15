@@ -3,7 +3,7 @@
     "code": "1.1",
     "name": "Nationhood and Citizenship",
     "definition": "Effects on inclusion, equal recognition, or protection of minorities and marginalised groups.",
-    "description": "Effects on the inclusivity of citizenship and the equal recognition and protection of minorities, vulnerable groups, and those at the margins of political life — including whether all people are equally seen, served, and protected by the state, or whether existing patterns of exclusion and discrimination are entrenched or deepened.",
+    "description": "Effects on the inclusivity of citizenship and the equal recognition and protection of minorities, vulnerable groups, and those at the margins of political life – including whether all people are equally seen, served, and protected by the state, or whether existing patterns of exclusion and discrimination are entrenched or deepened.",
     "pillar": "Citizenship, Law and Rights",
     "pillarCode": "1"
   },
@@ -51,7 +51,7 @@
     "code": "2.3",
     "name": "Effective and Accountable Government",
     "definition": "Effects on transparency, accountability, or fairness of government services and policymaking.",
-    "description": "Effects on the capacity of government to deliver public services fairly and implement policy faithfully; on the competence, transparency, and integrity of public administration; and on whether the systems and technologies governments use to exercise state power remain open to democratic scrutiny — including where dependencies on private or foreign providers shift effective control over state functions beyond democratic reach.",
+    "description": "Effects on the capacity of government to deliver public services fairly and implement policy faithfully; on the competence, transparency, and integrity of public administration; and on whether the systems and technologies governments use to exercise state power remain open to democratic scrutiny – including where dependencies on private or foreign providers shift effective control over state functions beyond democratic reach.",
     "pillar": "Representative and Accountable Government",
     "pillarCode": "2"
   },
@@ -83,7 +83,7 @@
     "code": "2.8",
     "name": "Illegitimate Influence over Policy-Making",
     "definition": "Effects on corruption, regulatory capture, or undue private influence over public policy and the policy process.",
-    "description": "Effects on the extent to which powerful actors shape policy through back channels — such as hidden lobbying, capturing regulators, or flooding consultations with artificial responses — rather than through open and accountable processes, and on how far policy outputs and outcomes reflect what the public actually wants.",
+    "description": "Effects on the extent to which powerful actors shape policy through back channels – such as hidden lobbying, capturing regulators, or flooding consultations with artificial responses – rather than through open and accountable processes, and on how far policy outputs and outcomes reflect what the public actually wants.",
     "pillar": "Representative and Accountable Government",
     "pillarCode": "2"
   },
@@ -99,7 +99,7 @@
     "code": "3.2",
     "name": "Opinion Formation and Political Participation",
     "definition": "Effects on how citizens form and exchange political views, participate in public life, or organise through civil society.",
-    "description": "Effects on the conditions under which citizens form, exchange, and revise political views — including through social media and other non-journalistic channels; on the depth, breadth, and authenticity of citizen participation in public life; on equal access to public voice across social groups; and on the range and independence of civil society and social movements.",
+    "description": "Effects on the conditions under which citizens form, exchange, and revise political views – including through social media and other non-journalistic channels; on the depth, breadth, and authenticity of citizen participation in public life; on equal access to public voice across social groups; and on the range and independence of civil society and social movements.",
     "pillar": "Civil Society and Popular Participation",
     "pillarCode": "3"
   },

@@ -23,12 +23,12 @@ import { useMemo, useState } from "react";
 
 const VIEW_W = 1040;
 // The canvas matches this panel's own content: the band fills TOP..BOT plus a
-// small bottom margin — no forced height that would spread the rows out and
+// small bottom margin – no forced height that would spread the rows out and
 // leave dead space inside the diagram.
 const VIEW_H = 480;
 
 // Geometry verbatim from the client mock (docs/2_Claude Code of Mock Website_UPDATED.jsx),
-// except BOT — extended from 392 to fill the taller 480px canvas (was tuned to
+// except BOT – extended from 392 to fill the taller 480px canvas (was tuned to
 // a 400px-tall layout; row heights derive from BOT - TOP, so this is the only
 // constant that needs to move for content to fill the new height).
 const LX = 34;
@@ -114,7 +114,7 @@ export const BipartiteMorphMap = ({
       const lines = all.slice(0, h >= 20 ? 2 : 1);
       const trunc = all.length > lines.length;
       // Pro-democracy activity boxes (B-codes) drop the code label per client
-      // request — only the harm-tier boxes (T-codes) keep theirs. The name
+      // request – only the harm-tier boxes (T-codes) keep theirs. The name
       // text shifts left to fill the gap where the code used to sit.
       const isActivity = d.code.startsWith("B");
       const tx = isActivity ? x + 9 : x + 9 + d.code.length * 5.6 + 8;
@@ -193,7 +193,7 @@ export const BipartiteMorphMap = ({
           style={k.act ? { cursor: "pointer" } : undefined}
           tabIndex={k.act ? 0 : undefined}
           role={k.act ? "button" : undefined}
-          aria-label={k.act ? `Link, ${fmt(k.n)} entries — view detail` : undefined}
+          aria-label={k.act ? `Link, ${fmt(k.n)} entries – view detail` : undefined}
           onClick={(e) => {
             e.stopPropagation();
             if (pz.wasJustDragged()) return;
@@ -209,7 +209,7 @@ export const BipartiteMorphMap = ({
         >
           <path d={`M${x1} ${y1} C ${x1 + 80} ${y1}, ${x2 - 80} ${y2}, ${x2} ${y2}`} fill="none" stroke={k.color} strokeWidth={(0.7 + k.n * 0.3).toFixed(1)} opacity={0.4} />
           {/* Mention-count label: only in a drill-down view (clicked into a
-              connection) — the overview has too many crossing links for the
+              connection) – the overview has too many crossing links for the
               numbers to read cleanly, so they're suppressed there. */}
           {view.type !== "overview" && (
             <text x={mx} y={my - 4} textAnchor="middle" fontSize={10} fontWeight={700} fill="#22201a" stroke="#ffffff" strokeWidth={2.5} paintOrder="stroke">
@@ -257,7 +257,7 @@ export const BipartiteMorphMap = ({
       items.push({
         key: "t-" + t,
         color: TIER_COLORS[t],
-        label: `${t} — ${HM2_TIER_SHORT[t]}`,
+        label: `${t} – ${HM2_TIER_SHORT[t]}`,
         sub: sub.join(", "),
         description: HARM_TIER_DESC[tierKeyOf(t)],
         lines: tierCodes.map((c) => harmTaxonomy?.codes[c]?.label).filter((x): x is string => !!x),
@@ -269,7 +269,10 @@ export const BipartiteMorphMap = ({
       items.push({
         key: "b-" + b,
         color: HM2_BEN_COLOR[b],
-        label: `${b} ${blabel(b)}`,
+        // Client request (2026-09-14): the legend drops the benefit IDs
+        // (B1/B2…); harm-tier IDs (T1/T2…) are kept on the tiers side because
+        // they're needed to read the tiered system.
+        label: blabel(b),
         sub: sub.join(", "),
         description: benefitTaxonomy?.codes[b]?.description,
         lines: groupCodes.map((c) => benefitTaxonomy?.codes[c]?.label ?? benefitTaxonomy?.codes[c]?.name).filter((x): x is string => !!x),
@@ -373,7 +376,7 @@ export const BipartiteMorphMap = ({
       {(() => {
         // Split into two labeled sections (harm tiers / pro-democracy
         // activities) instead of one flat wrapped row, so the reader can see
-        // where one group ends and the other begins — matches the
+        // where one group ends and the other begins – matches the
         // "Democracy aspects" header pattern used by the Pathways panel.
         const tierItems = legendItems.filter((i) => i.key.startsWith("t-"));
         const benItems = legendItems.filter((i) => i.key.startsWith("b-"));
@@ -393,7 +396,7 @@ export const BipartiteMorphMap = ({
               role={actionable ? "button" : undefined}
               aria-label={
                 actionable
-                  ? `${item.label} — ${item.description ?? "Sub-codes"}`
+                  ? `${item.label} – ${item.description ?? "Sub-codes"}`
                   : undefined
               }
               onMouseEnter={

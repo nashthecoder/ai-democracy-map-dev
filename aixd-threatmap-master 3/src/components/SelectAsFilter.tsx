@@ -11,7 +11,7 @@ type SelectAsFilterProps = {
 };
 
 export const SelectAsFilter = ({ target, onApply, onDismiss }: SelectAsFilterProps) => {
-  // "name (CODE)" — codes appended in parens unless the label already carries them.
+  // "name (CODE)" – codes appended in parens unless the label already carries them.
   const codes = target.codes.join(", ");
   const showCodes = codes && !target.label.includes(codes);
   return (

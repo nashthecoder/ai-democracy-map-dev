@@ -184,7 +184,7 @@ export const FilterBar = ({
           onChange={(v) => setFilter("benefit", v)}
         />
 
-        {/* Source last — mirrors the table's final column */}
+        {/* Source last – mirrors the table's final column */}
         <MultiSelect
           label="Source"
           options={sourceOptions}

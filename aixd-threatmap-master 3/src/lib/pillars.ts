@@ -1,4 +1,4 @@
-// Centralised pillar color configuration — edit here to update both chips and dialog.
+// Centralised pillar color configuration – edit here to update both chips and dialog.
 // Pillars 3 (Blue) and 4 (Lime) use light P4D accents as bg; derived dark text ensures contrast.
 
 export type PillarColorConfig = {
@@ -14,7 +14,7 @@ export type PillarColorConfig = {
 
 export const PILLAR_COLORS: Record<string, PillarColorConfig> = {
   "1": {
-    // P4D Brick — Citizenship, Law and Rights
+    // P4D Brick – Citizenship, Law and Rights
     chipBg:          "rgba(150,55,53,0.12)",
     chipText:        "#963735",
     dialogHeaderBg:  "rgba(150,55,53,0.08)",
@@ -23,7 +23,7 @@ export const PILLAR_COLORS: Record<string, PillarColorConfig> = {
     dialogBadgeText: "#963735",
   },
   "2": {
-    // P4D Grassroot — Representative and Accountable Government
+    // P4D Grassroot – Representative and Accountable Government
     chipBg:          "rgba(0,177,64,0.12)",
     chipText:        "#00B140",
     dialogHeaderBg:  "rgba(0,177,64,0.08)",
@@ -32,7 +32,7 @@ export const PILLAR_COLORS: Record<string, PillarColorConfig> = {
     dialogBadgeText: "#007a2f",
   },
   "3": {
-    // P4D Blue (#92C2FF) tint — Civil Society and Popular Participation.
+    // P4D Blue (#92C2FF) tint – Civil Society and Popular Participation.
     // Text uses a darkened blue so small type stays legible on the light tint.
     chipBg:          "rgba(146,194,255,0.25)",
     chipText:        "#1a5c9a",
@@ -42,7 +42,7 @@ export const PILLAR_COLORS: Record<string, PillarColorConfig> = {
     dialogBadgeText: "#1a5c9a",
   },
   "4": {
-    // P4D Lime (#D9E021) tint — Democratic Governance of AI.
+    // P4D Lime (#D9E021) tint – Democratic Governance of AI.
     // Text uses a darkened olive so small type stays legible on the light tint.
     chipBg:          "rgba(217,224,33,0.22)",
     chipText:        "#5a5a00",

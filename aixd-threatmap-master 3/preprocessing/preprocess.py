@@ -22,12 +22,12 @@ from typing import Optional
 import openpyxl
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-# 2026-09-14: client sent a dataset refresh (citations homogenised — same IDs,
-# codes, and text; only the Source column changed) as a standalone workbook
+# 2026-09-14: client sent the V10.4 dataset refresh (citations homogenised, the
+# Ovadya link corrected, and entries 147/148 retired) as a standalone workbook
 # with just the DATASET sheet. The codebook taxonomy is untouched and still
 # comes from the original workbook (see generate_taxonomy.py's INPUT_XLSX).
-INPUT_XLSX = PROJECT_ROOT / "docs" / "20260911_Updated data.xlsx"
-DATASET_SHEET = "DATASET V 10.3"
+INPUT_XLSX = PROJECT_ROOT / "docs" / "20260914_Updated data (V10.4).xlsx"
+DATASET_SHEET = "V 10.4 (->MechLeg V0.52)"
 INPUT_CSV = PROJECT_ROOT / "data" / "raw" / "latest.csv"
 OUTPUT_JSON = PROJECT_ROOT / "public" / "data" / "data.json"
 ASPECTS_JSON = PROJECT_ROOT / "public" / "data" / "aspects.json"
@@ -60,6 +60,14 @@ KNOWN_ABBREVIATIONS: dict[str, str] = {
 ASPECT_CODE_RE = re.compile(r"^(\d+\.\d+)")
 URL_RE = re.compile(r"https?://\S+")
 YEAR_PAREN_RE = re.compile(r"\((\d{4}(?:/\d{4})?)\)")
+
+
+def normalise_dashes(value: str) -> str:
+    """Client editorial rule (2026-09-14): UK style — em-dashes are treated as
+    a telltale of AI copy, so all em-dashes give way to en-dashes."""
+    if not value:
+        return value
+    return value.replace("\u2014", "\u2013")
 
 
 def is_empty(value: str) -> bool:
@@ -517,6 +525,9 @@ def preprocess(
         if item is None:
             skipped += 1
             continue
+        for key, value in item.items():
+            if isinstance(value, str):
+                item[key] = normalise_dashes(value)
         items.append(item)
 
     print(f"Transformed {len(items)} items ({skipped} rows skipped)")

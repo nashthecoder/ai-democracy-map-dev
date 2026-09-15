@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 // Client-approved collection mechanism (Option 2): feedback goes to the P4D
 // inbox via the visitor's own mail app (mailto) with a fixed subject line. No
-// server, no PAT. This component only owns the presentation — a bottom-right
+// server, no PAT. This component only owns the presentation – a bottom-right
 // pill that opens a small popover with an "Open email" action plus a
 // copy-the-address fallback for visitors with no mail client configured.
 const FEEDBACK_EMAIL = "hello@powerfordemocracies.org";
@@ -37,7 +37,7 @@ export const FloatingFeedback = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
     } catch {
-      /* clipboard blocked — the Open email button still works */
+      /* clipboard blocked – the Open email button still works */
     }
   };
 

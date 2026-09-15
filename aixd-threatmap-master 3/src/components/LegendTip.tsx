@@ -15,7 +15,7 @@ export type LegendTipData = {
 //
 // The tip is interactive (pointer-events:auto) so a long sub-code list can be
 // wheel-scrolled. It stays open only while the cursor is inside the hovered
-// legend box (anchor) OR the tip itself — a global pointer-follower closes it
+// legend box (anchor) OR the tip itself – a global pointer-follower closes it
 // the moment the cursor leaves both, so it never feels sticky but always
 // reachable/scrollable.
 export const useLegendTip = () => {
@@ -30,14 +30,14 @@ export const useLegendTip = () => {
   const TIP_WIDTH = 240;
 
   // "auto" (default) drops the tip above/below the anchor, left-aligned to
-  // it — right for a wide legend row, but for a narrow chip stacked among
+  // it – right for a wide legend row, but for a narrow chip stacked among
   // siblings (e.g. a democracy-aspect pill), dropping above/below covers the
   // chip itself and the next one in the stack. "right" instead places the
   // tip beside the anchor, at its own vertical level, so it never overlaps
   // any pill in that column.
   //
   // `bounds`, when given (typically the panel card's own rect), clamps the
-  // tip inside that container instead of the full viewport — otherwise a tip
+  // tip inside that container instead of the full viewport – otherwise a tip
   // opened near a panel's edge can spill out over neighbouring page content.
   const open = (data: LegendTipData, rect: DOMRect, placement: "auto" | "right" = "auto", bounds?: DOMRect) => {
     anchorRef.current = rect;
@@ -47,13 +47,13 @@ export const useLegendTip = () => {
     const maxX = bounds ? bounds.right - pad : window.innerWidth - pad;
     const minY = bounds ? bounds.top + pad : pad;
     const maxY = bounds ? bounds.bottom - pad : window.innerHeight - pad;
-    // Estimated tip height for clamping purposes — the real height is only
+    // Estimated tip height for clamping purposes – the real height is only
     // known after render, but title+description (no sub-code list) reliably
     // lands under ~110px, which is all "right" placement needs to stay tidy.
     const estH = data.lines?.length ? 220 : 110;
     if (placement === "right") {
       // These anchors are often near the right edge of their container (the
-      // rightmost column of a diagram) — clamping a fixed "rect.right + gap"
+      // rightmost column of a diagram) – clamping a fixed "rect.right + gap"
       // into the visible width there just pulls the tip back over the chip
       // it's meant to clear. Flip to the LEFT of the anchor instead whenever
       // there isn't genuinely enough room on the right.
@@ -122,7 +122,7 @@ export const useLegendTip = () => {
         textAlign: "left",
       }}
     >
-      {/* Sized down from the original 11/12.5px — next to the diagram's own
+      {/* Sized down from the original 11/12.5px – next to the diagram's own
           10-11px labels those read oversized, more like a heading than a
           tooltip. */}
       <div

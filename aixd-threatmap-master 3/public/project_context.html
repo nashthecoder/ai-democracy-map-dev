@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AIxD Threat Map — Project Context</title>
+<title>AIxD Threat Map – Project Context</title>
 <style>
   :root {
     --ecru: #F4F4EA;
@@ -427,7 +427,7 @@
           Filterable, searchable database of ~190 AI threats and opportunities to democracy,
           mapped to the <strong>IDEA Democracy Assessment Framework</strong> (P4Democracy aspect codes).
           Built for P4D researchers to share with policymakers. The map is an <strong>embeddable
-          static component</strong> — no server, no database, no backend. All interactivity is
+          static component</strong> – no server, no database, no backend. All interactivity is
           client-side React. Data is compiled from CSV at build time.
         </p>
       </section>
@@ -585,20 +585,20 @@ bun run preprocess</code></pre>
         <p><strong>Philosophy:</strong> Data density over decoration. Restraint is the aesthetic.</p>
 
         <h3>Semantic Colors</h3>
-        <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.5rem">Official P4D palette per Karoline (v0.5). Orange and Rose are not design-conform — do not use.</p>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.5rem">Official P4D palette per Karoline (v0.5). Orange and Rose are not design-conform – do not use.</p>
         <ul class="color-list">
-          <li><span class="color-swatch" style="background:#F4F4EA;border-color:#ccc"></span> <strong>Ecru</strong> <code>#F4F4EA</code> (244/244/234) — Page background</li>
-          <li><span class="color-swatch" style="background:#000000"></span> <strong>Black</strong> <code>#000000</code> (0/0/0) — Text, objects</li>
-          <li><span class="color-swatch" style="background:#963737"></span> <strong>Brick</strong> <code>#963737</code> (150/55/53) — Threats, danger, Pillar 1</li>
-          <li><span class="color-swatch" style="background:#00B140"></span> <strong>Grassroot</strong> <code>#00B140</code> (0/177/64) — Solutions, opportunities, Pillar 2</li>
-          <li><span class="color-swatch" style="background:#99C2FF"></span> <strong>Blue</strong> <code>#99C2FF</code> (153/194/255) — Pillar 3, accent</li>
-          <li><span class="color-swatch" style="background:#D9EC44"></span> <strong>Lime</strong> <code>#D9EC44</code> (217/236/68) — Pillar 4, warnings</li>
+          <li><span class="color-swatch" style="background:#F4F4EA;border-color:#ccc"></span> <strong>Ecru</strong> <code>#F4F4EA</code> (244/244/234) – Page background</li>
+          <li><span class="color-swatch" style="background:#000000"></span> <strong>Black</strong> <code>#000000</code> (0/0/0) – Text, objects</li>
+          <li><span class="color-swatch" style="background:#963737"></span> <strong>Brick</strong> <code>#963737</code> (150/55/53) – Threats, danger, Pillar 1</li>
+          <li><span class="color-swatch" style="background:#00B140"></span> <strong>Grassroot</strong> <code>#00B140</code> (0/177/64) – Solutions, opportunities, Pillar 2</li>
+          <li><span class="color-swatch" style="background:#99C2FF"></span> <strong>Blue</strong> <code>#99C2FF</code> (153/194/255) – Pillar 3, accent</li>
+          <li><span class="color-swatch" style="background:#D9EC44"></span> <strong>Lime</strong> <code>#D9EC44</code> (217/236/68) – Pillar 4, warnings</li>
         </ul>
       </section>
 
       <!-- TODO -->
       <section id="todo">
-        <h2>Pre-Publish Todo <span style="font-size:0.8rem;font-weight:400;color:var(--text-muted)">(from Karoline — Additional Edits 04.06 + v0.5 framework 10.06)</span></h2>
+        <h2>Pre-Publish Todo <span style="font-size:0.8rem;font-weight:400;color:var(--text-muted)">(from Karoline – Additional Edits 04.06 + v0.5 framework 10.06)</span></h2>
         <p style="font-size:0.85rem;margin-bottom:1rem">
           <strong>Live:</strong> <a href="https://nashthecoder.github.io/ai-democracy-map-dev/" target="_blank">nashthecoder.github.io/ai-democracy-map-dev/</a> &middot;
           <strong>Docs:</strong> <a href="project_context.html">project_context.html</a>
@@ -606,29 +606,29 @@ bun run preprocess</code></pre>
 
         <h3>Data &amp; Content</h3>
         <ul>
-          <li><input type="checkbox" disabled> <strong>Update data to V10.0</strong> — replace <code>mapping.csv</code> (awaiting file)</li>
-          <li><input type="checkbox" disabled checked> <strong>Rename "solution" → "mitigation strategy"</strong> — everywhere</li>
-          <li><input type="checkbox" disabled> <strong>Update Introduction text</strong> — rewrite intro with CTA (needs copy)</li>
-          <li><input type="checkbox" disabled checked> <strong>Add codebook link</strong> — icon on Democracy Aspects header → <code>/codebook.html</code></li>
-          <li><input type="checkbox" disabled checked> <strong>Codebook HTML page</strong> — standalone page at <code>public/codebook.html</code> with full framework</li>
-          <li><input type="checkbox" disabled checked> <strong>Move decentralisation pillar 3 → 2</strong> — done in docs (<code>codebook.html</code>, <code>code_descriptions.md</code>), pending in <code>aspects.json</code> until V10.0 data</li>
-          <li><input type="checkbox" disabled> <strong>Rename "Decentralisation" → "National–Subnational Power Relations"</strong> (v0.5) — <code>aspects.json</code></li>
-          <li><input type="checkbox" disabled> <strong>Rename pillar "Democracy Beyond the State" → "Transnational Dynamics"</strong> (v0.5) — <code>aspects.json</code>, <code>IntroSection.tsx</code></li>
-          <li><input type="checkbox" disabled> <strong>Align colour palette to official P4D values</strong> — Brick <code>#963737</code>, Blue <code>#99C2FF</code>, Lime <code>#D9EC44</code>, drop Orange/Rose</li>
-          <li><input type="checkbox" disabled> <strong>Potentially change pillar columns to match slide deck</strong> — need clarification/slide</li>
+          <li><input type="checkbox" disabled> <strong>Update data to V10.0</strong> – replace <code>mapping.csv</code> (awaiting file)</li>
+          <li><input type="checkbox" disabled checked> <strong>Rename "solution" → "mitigation strategy"</strong> – everywhere</li>
+          <li><input type="checkbox" disabled> <strong>Update Introduction text</strong> – rewrite intro with CTA (needs copy)</li>
+          <li><input type="checkbox" disabled checked> <strong>Add codebook link</strong> – icon on Democracy Aspects header → <code>/codebook.html</code></li>
+          <li><input type="checkbox" disabled checked> <strong>Codebook HTML page</strong> – standalone page at <code>public/codebook.html</code> with full framework</li>
+          <li><input type="checkbox" disabled checked> <strong>Move decentralisation pillar 3 → 2</strong> – done in docs (<code>codebook.html</code>, <code>code_descriptions.md</code>), pending in <code>aspects.json</code> until V10.0 data</li>
+          <li><input type="checkbox" disabled> <strong>Rename "Decentralisation" → "National–Subnational Power Relations"</strong> (v0.5) – <code>aspects.json</code></li>
+          <li><input type="checkbox" disabled> <strong>Rename pillar "Democracy Beyond the State" → "Transnational Dynamics"</strong> (v0.5) – <code>aspects.json</code>, <code>IntroSection.tsx</code></li>
+          <li><input type="checkbox" disabled> <strong>Align colour palette to official P4D values</strong> – Brick <code>#963737</code>, Blue <code>#99C2FF</code>, Lime <code>#D9EC44</code>, drop Orange/Rose</li>
+          <li><input type="checkbox" disabled> <strong>Potentially change pillar columns to match slide deck</strong> – need clarification/slide</li>
         </ul>
 
         <h3>Filter Buttons</h3>
         <ul>
-          <li><input type="checkbox" disabled checked> <strong>Extend search bar</strong> — <code>w-64</code> → <code>w-72</code></li>
+          <li><input type="checkbox" disabled checked> <strong>Extend search bar</strong> – <code>w-64</code> → <code>w-72</code></li>
           <li><input type="checkbox" disabled checked> <strong>Rename:</strong> Type → Impact type, Threat+Solution → Threat+mitigation pairing, Opportunity → Independent opportunity, Aspects → Democracy aspects</li>
-          <li><input type="checkbox" disabled checked> <strong>Fix threat+solution filter</strong> — pills show friendly labels</li>
+          <li><input type="checkbox" disabled checked> <strong>Fix threat+solution filter</strong> – pills show friendly labels</li>
         </ul>
 
         <h3>Table Headers</h3>
         <ul>
-          <li><input type="checkbox" disabled checked> <strong>Freeze header row</strong> — sticky below filter bar</li>
-          <li><input type="checkbox" disabled checked> <strong>Info icons</strong> — clickable pop-ups on each column</li>
+          <li><input type="checkbox" disabled checked> <strong>Freeze header row</strong> – sticky below filter bar</li>
+          <li><input type="checkbox" disabled checked> <strong>Info icons</strong> – clickable pop-ups on each column</li>
           <li><input type="checkbox" disabled checked> <strong>Codebook link</strong> on aspects header</li>
           <li><input type="checkbox" disabled checked> <strong>Rename column:</strong> Solution → Mitigation strategy</li>
         </ul>
@@ -637,7 +637,7 @@ bun run preprocess</code></pre>
         <ul>
           <li><input type="checkbox" disabled checked> <strong>Update type labels</strong></li>
           <li><input type="checkbox" disabled checked> <strong>Threat paraphrase in every row</strong></li>
-          <li><input type="checkbox" disabled checked> <strong>Aspects pop-up</strong> — larger codebook entry + pillar</li>
+          <li><input type="checkbox" disabled checked> <strong>Aspects pop-up</strong> – larger codebook entry + pillar</li>
           <li><input type="checkbox" disabled checked> <strong>Primary aspects first</strong></li>
           <li><input type="checkbox" disabled checked> <strong>Inline extension styling</strong></li>
         </ul>
@@ -651,7 +651,7 @@ bun run preprocess</code></pre>
           <li><input type="checkbox" disabled> Push to GitHub org repo</li>
           <li><input type="checkbox" disabled> Enable GitHub Pages in repo settings</li>
           <li><input type="checkbox" disabled> Embed in P4D website</li>
-          <li><input type="checkbox" disabled> <strong>Rebuild admin panel</strong> for static GitHub Pages (GitHub API approach — no Cloudflare)</li>
+          <li><input type="checkbox" disabled> <strong>Rebuild admin panel</strong> for static GitHub Pages (GitHub API approach – no Cloudflare)</li>
           <li><input type="checkbox" disabled> <strong>Write proper README</strong> for reusable template (clone, setup, data pipeline)</li>
         </ul>
 
@@ -690,7 +690,7 @@ bun run preprocess</code></pre>
 
         <h3>Code conventions</h3>
         <ul>
-          <li>Single React island — all interactivity inside <code>ThreatMap</code></li>
+          <li>Single React island – all interactivity inside <code>ThreatMap</code></li>
           <li><code>sourceShort</code> in table, full <code>source</code> in expanded row</li>
           <li>No <code>overflow-hidden</code> on table cells</li>
           <li>Brand colors carry semantic meaning</li>
@@ -703,8 +703,8 @@ bun run preprocess</code></pre>
         <table>
           <tr><th>File</th><th>Purpose</th></tr>
           <tr><td><code>CLAUDE.md</code></td><td>Full architecture, design system, component map, conventions</td></tr>
-          <tr><td><code>astro.config.mjs</code></td><td>Build config — static output, no adapter</td></tr>
-          <tr><td><code>src/hooks/useDataLoader.ts</code></td><td>Fetches data at runtime — env-configurable URLs</td></tr>
+          <tr><td><code>astro.config.mjs</code></td><td>Build config – static output, no adapter</td></tr>
+          <tr><td><code>src/hooks/useDataLoader.ts</code></td><td>Fetches data at runtime – env-configurable URLs</td></tr>
           <tr><td><code>src/lib/types.ts</code></td><td>Shared TypeScript types</td></tr>
           <tr><td><code>src/styles/globals.css</code></td><td>Tailwind + P4D theme variables</td></tr>
           <tr><td><code>data/raw/mapping.csv</code></td><td>Source data (single source of truth)</td></tr>
@@ -726,11 +726,11 @@ bun run preprocess</code></pre>
             <p><strong>Objective:</strong> Fix the five Table Entry todo items.</p>
             <p><strong>What was done:</strong></p>
             <ol>
-              <li><strong>Type badge labels</strong> — "Opportunity" → "Independent opportunity" (two-line). "Threat + Mitigation" kept short to avoid column clipping</li>
-              <li><strong>Threat paraphrase in every grouped row</strong> — removed <code>↳ same threat — different mitigation</code> shortcut. All rows show the full description</li>
-              <li><strong>Aspects pop-up shows full entry + pillar</strong> — tooltip now shows aspect code, pillar name, and full description</li>
-              <li><strong>Primary aspects first by pillar order</strong> — preprocessing parses primary/secondary markers, sorts primary first by pillar then code</li>
-              <li><strong>Inline extension styling</strong> — grouped row border uses brick for threats, grassroot for opportunities</li>
+              <li><strong>Type badge labels</strong> – "Opportunity" → "Independent opportunity" (two-line). "Threat + Mitigation" kept short to avoid column clipping</li>
+              <li><strong>Threat paraphrase in every grouped row</strong> – removed <code>↳ same threat – different mitigation</code> shortcut. All rows show the full description</li>
+              <li><strong>Aspects pop-up shows full entry + pillar</strong> – tooltip now shows aspect code, pillar name, and full description</li>
+              <li><strong>Primary aspects first by pillar order</strong> – preprocessing parses primary/secondary markers, sorts primary first by pillar then code</li>
+              <li><strong>Inline extension styling</strong> – grouped row border uses brick for threats, grassroot for opportunities</li>
             </ol>
             <p><strong>Files changed:</strong> <code>TypeBadge.tsx</code>, <code>DataTable.tsx</code>, <code>AspectChips.tsx</code>, <code>preprocessing.ts</code></p>
           </div>
@@ -745,9 +745,9 @@ bun run preprocess</code></pre>
             <p><strong>Objective:</strong> Freeze table header on scroll, add column info popovers, link to democracy codebook.</p>
             <p><strong>What was done:</strong></p>
             <ol>
-              <li><strong>Sticky table header</strong> — <code>&lt;TableHeader&gt;</code> now sticks below the filter bar with a card background so body rows scroll underneath</li>
-              <li><strong>Info popovers</strong> — small <code>(i)</code> icon on each column header, click to see a description of what the column contains</li>
-              <li><strong>Codebook link</strong> — external link icon next to "Democracy Aspects" header linking to the P4Dem code descriptions on GitHub</li>
+              <li><strong>Sticky table header</strong> – <code>&lt;TableHeader&gt;</code> now sticks below the filter bar with a card background so body rows scroll underneath</li>
+              <li><strong>Info popovers</strong> – small <code>(i)</code> icon on each column header, click to see a description of what the column contains</li>
+              <li><strong>Codebook link</strong> – external link icon next to "Democracy Aspects" header linking to the P4Dem code descriptions on GitHub</li>
             </ol>
             <p><strong>Files changed:</strong> <code>DataTable.tsx</code></p>
           </div>
@@ -762,7 +762,7 @@ bun run preprocess</code></pre>
             <p><strong>Objective:</strong> Extend search bar, rename filter labels, fix type pill display.</p>
             <p><strong>What was done:</strong></p>
             <ol>
-              <li><strong>Extended search bar</strong> — width from <code>w-64</code> (256px) to <code>w-72</code> (288px)</li>
+              <li><strong>Extended search bar</strong> – width from <code>w-64</code> (256px) to <code>w-72</code> (288px)</li>
               <li><strong>Renamed filter labels:</strong>
                 <ul>
                   <li><code>Type</code> → <code>Impact type</code></li>
@@ -770,7 +770,7 @@ bun run preprocess</code></pre>
                   <li><code>Aspects</code> → <code>Democracy aspects</code></li>
                 </ul>
               </li>
-              <li><strong>Fixed type pill labels</strong> — pills now show friendly names (<code>Threat + Mitigation pairing</code>, etc.) instead of raw type values. Pill prefix updated from <code>Type:</code> to <code>Impact type:</code>.</li>
+              <li><strong>Fixed type pill labels</strong> – pills now show friendly names (<code>Threat + Mitigation pairing</code>, etc.) instead of raw type values. Pill prefix updated from <code>Type:</code> to <code>Impact type:</code>.</li>
             </ol>
             <p><strong>Files changed:</strong> <code>FilterBar.tsx</code></p>
           </div>
@@ -785,17 +785,17 @@ bun run preprocess</code></pre>
             <p><strong>Objective:</strong> Update all user-facing references from "solution" to "mitigation strategy".</p>
             <p><strong>What was done:</strong></p>
             <ol>
-              <li><strong>Table column header</strong> — "Solution" → "Mitigation Strategy"</li>
-              <li><strong>Fallback text</strong> — "No solution mapped" → "No mitigation mapped"</li>
-              <li><strong>Group label</strong> — "same threat — different solution" → "same threat — different mitigation"</li>
-              <li><strong>Filter bar</strong> — search placeholder "solutions" → "mitigations", type filter "Threat + Solution" → "Threat + Mitigation pairing"</li>
-              <li><strong>Type badge</strong> — "Threat + Solution" → "Threat + Mitigation"</li>
-              <li><strong>Intro section</strong> — stat "Solutions mapped" → "Mitigations mapped", intro text updated</li>
-              <li><strong>Page title &amp; meta</strong> — <code>&lt;title&gt;</code>, description, og tags all updated</li>
-              <li><strong>CSV export</strong> — column header in exported CSV</li>
+              <li><strong>Table column header</strong> – "Solution" → "Mitigation Strategy"</li>
+              <li><strong>Fallback text</strong> – "No solution mapped" → "No mitigation mapped"</li>
+              <li><strong>Group label</strong> – "same threat – different solution" → "same threat – different mitigation"</li>
+              <li><strong>Filter bar</strong> – search placeholder "solutions" → "mitigations", type filter "Threat + Solution" → "Threat + Mitigation pairing"</li>
+              <li><strong>Type badge</strong> – "Threat + Solution" → "Threat + Mitigation"</li>
+              <li><strong>Intro section</strong> – stat "Solutions mapped" → "Mitigations mapped", intro text updated</li>
+              <li><strong>Page title &amp; meta</strong> – <code>&lt;title&gt;</code>, description, og tags all updated</li>
+              <li><strong>CSV export</strong> – column header in exported CSV</li>
             </ol>
             <p><strong>Files changed:</strong> <code>DataTable.tsx</code>, <code>FilterBar.tsx</code>, <code>TypeBadge.tsx</code>, <code>IntroSection.tsx</code>, <code>index.astro</code>, <code>utils.ts</code></p>
-            <p><strong>Key decisions:</strong> Internal code identifiers (property names, type strings) left unchanged — they're data pipeline internals, not user-facing text.</p>
+            <p><strong>Key decisions:</strong> Internal code identifiers (property names, type strings) left unchanged – they're data pipeline internals, not user-facing text.</p>
           </div>
         </div>
 
@@ -808,18 +808,18 @@ bun run preprocess</code></pre>
             <p><strong>Objective:</strong> Strip Cloudflare infra, switch to static output, deploy to GitHub Pages.</p>
             <p><strong>What was done:</strong></p>
             <ol>
-              <li><strong>Removed Cloudflare stack</strong> — deleted <code>wrangler.toml</code>, <code>AdminPanel.tsx</code>, <code>middleware.ts</code>, <code>storage.ts</code>, all API routes, <code>public/_headers</code>, <code>public/logo.png</code>. CLAUDE.md/README still reference these (outdated).</li>
-              <li><strong>Switched to static output</strong> — <code>astro.config.mjs</code> set to <code>output: "static"</code>, no adapter.</li>
-              <li><strong>Set up GitHub Actions</strong> — created <code>.github/workflows/deploy.yml</code> for Pages deployment on push to <code>dev</code>/<code>main</code>.</li>
-              <li><strong>Created project docs</strong> — <code>CLAUDE.md</code>, <code>project_context.md/html</code>, <code>BUILD_LOG.md</code>.</li>
+              <li><strong>Removed Cloudflare stack</strong> – deleted <code>wrangler.toml</code>, <code>AdminPanel.tsx</code>, <code>middleware.ts</code>, <code>storage.ts</code>, all API routes, <code>public/_headers</code>, <code>public/logo.png</code>. CLAUDE.md/README still reference these (outdated).</li>
+              <li><strong>Switched to static output</strong> – <code>astro.config.mjs</code> set to <code>output: "static"</code>, no adapter.</li>
+              <li><strong>Set up GitHub Actions</strong> – created <code>.github/workflows/deploy.yml</code> for Pages deployment on push to <code>dev</code>/<code>main</code>.</li>
+              <li><strong>Created project docs</strong> – <code>CLAUDE.md</code>, <code>project_context.md/html</code>, <code>BUILD_LOG.md</code>.</li>
               <li><strong>Pushed to P4Dem org</strong> but no Pages access.</li>
               <li><strong>Created fresh public repo</strong> under personal GitHub (<code>nashthecoder/ai-democracy-map-dev</code>) with orphan commit to break fork link.</li>
-              <li><strong>Fixed asset paths</strong> — added <code>site</code> and <code>base</code> to <code>astro.config.mjs</code> for GitHub Pages subdirectory (<code>/ai-democracy-map-dev/</code>).</li>
+              <li><strong>Fixed asset paths</strong> – added <code>site</code> and <code>base</code> to <code>astro.config.mjs</code> for GitHub Pages subdirectory (<code>/ai-democracy-map-dev/</code>).</li>
               <li><strong>Live at:</strong> <a href="https://nashthecoder.github.io/ai-democracy-map-dev/">https://nashthecoder.github.io/ai-democracy-map-dev/</a></li>
             </ol>
             <p><strong>Key decisions:</strong></p>
             <ul>
-              <li>Going static (no Cloudflare) for now — data updates via CSV commit.</li>
+              <li>Going static (no Cloudflare) for now – data updates via CSV commit.</li>
               <li><code>dev</code> branch is working branch for all fixes. <code>main</code> for production.</li>
               <li>Repo at <code>nashthecoder/ai-democracy-map-dev</code>; can push to P4Dem org later via <code>upstream</code> remote.</li>
             </ul>
@@ -855,12 +855,12 @@ bun run preprocess</code></pre>
 
             <p><strong>Verification:</strong></p>
             <div class="checklist-grid">
-              <span class="status ok">&#10003;</span><span><code>bun install --frozen-lockfile</code> — 625 installs, 711 packages</span>
-              <span class="status ok">&#10003;</span><span><code>bun run build</code> — 1 page, 28s, static output</span>
-              <span class="status ok">&#10003;</span><span><code>bun run dev</code> — HTTP 200 at localhost:4321</span>
-              <span class="status ok">&#10003;</span><span><code>bun test</code> — 39 TS tests pass</span>
-              <span class="status ok">&#10003;</span><span><code>pytest preprocessing/tests/</code> — 32 Python tests pass</span>
-              <span class="status ok">&#10003;</span><span><code>bun run preprocess</code> — data.json regenerated from CSV</span>
+              <span class="status ok">&#10003;</span><span><code>bun install --frozen-lockfile</code> – 625 installs, 711 packages</span>
+              <span class="status ok">&#10003;</span><span><code>bun run build</code> – 1 page, 28s, static output</span>
+              <span class="status ok">&#10003;</span><span><code>bun run dev</code> – HTTP 200 at localhost:4321</span>
+              <span class="status ok">&#10003;</span><span><code>bun test</code> – 39 TS tests pass</span>
+              <span class="status ok">&#10003;</span><span><code>pytest preprocessing/tests/</code> – 32 Python tests pass</span>
+              <span class="status ok">&#10003;</span><span><code>bun run preprocess</code> – data.json regenerated from CSV</span>
             </div>
 
             <p style="margin-top:0.5rem"><strong>Key commands for future sessions:</strong></p>

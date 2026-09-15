@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>P4Dem Codebook — AIxD Threat Map</title>
+<title>P4Dem Codebook – AIxD Threat Map</title>
 <style>
   :root {
     --ecru: #F4F4EA;
@@ -125,7 +125,7 @@
     </div>
     <div class="pillar-abstract">
       Concerns the rights of citizens and the state's ability to guarantee equal rights through
-      constitutional and legal processes — including civil, political, economic and social rights.
+      constitutional and legal processes – including civil, political, economic and social rights.
     </div>
 
     <div class="aspect">
@@ -134,7 +134,7 @@
         <span class="aspect-name">Nationhood and Citizenship</span>
       </div>
       <div class="aspect-def">Effects on inclusion, equal recognition, or protection of minorities and marginalised groups.</div>
-      <div class="aspect-desc">Effects on the inclusivity of citizenship and the equal recognition and protection of minorities, vulnerable groups, and those at the margins of political life — including whether all people are equally seen, served, and protected by the state, or whether existing patterns of exclusion and discrimination are entrenched or deepened.</div>
+      <div class="aspect-desc">Effects on the inclusivity of citizenship and the equal recognition and protection of minorities, vulnerable groups, and those at the margins of political life – including whether all people are equally seen, served, and protected by the state, or whether existing patterns of exclusion and discrimination are entrenched or deepened.</div>
     </div>
 
     <div class="aspect">
@@ -202,7 +202,7 @@
         <span class="aspect-name">Effective and Accountable Government</span>
       </div>
       <div class="aspect-def">Effects on transparency, accountability, or fairness of government services and policymaking.</div>
-      <div class="aspect-desc">Effects on the capacity of government to deliver public services fairly and implement policy faithfully; on the competence, transparency, and integrity of public administration; and on whether the systems and technologies governments use to exercise state power remain open to democratic scrutiny — including where dependencies on private or foreign providers shift effective control over state functions beyond democratic reach.</div>
+      <div class="aspect-desc">Effects on the capacity of government to deliver public services fairly and implement policy faithfully; on the competence, transparency, and integrity of public administration; and on whether the systems and technologies governments use to exercise state power remain open to democratic scrutiny – including where dependencies on private or foreign providers shift effective control over state functions beyond democratic reach.</div>
     </div>
 
     <div class="aspect">
@@ -247,7 +247,7 @@
         <span class="aspect-name">Illegitimate Influence over Policy-Making</span>
       </div>
       <div class="aspect-def">Effects on corruption, regulatory capture, or undue private influence over public policy and the policy process.</div>
-      <div class="aspect-desc">Effects on the extent to which powerful actors shape policy through back channels — such as hidden lobbying, capturing regulators, or flooding consultations with artificial responses — rather than through open and accountable processes, and on how far policy outputs and outcomes reflect what the public actually wants.</div>
+      <div class="aspect-desc">Effects on the extent to which powerful actors shape policy through back channels – such as hidden lobbying, capturing regulators, or flooding consultations with artificial responses – rather than through open and accountable processes, and on how far policy outputs and outcomes reflect what the public actually wants.</div>
     </div>
   </div>
 
@@ -277,7 +277,7 @@
         <span class="aspect-name">Opinion Formation and Political Participation</span>
       </div>
       <div class="aspect-def">Effects on how citizens form and exchange political views, participate in public life, or organise through civil society.</div>
-      <div class="aspect-desc">Effects on the conditions under which citizens form, exchange, and revise political views — including through social media and other non-journalistic channels; on the depth, breadth, and authenticity of citizen participation in public life; on equal access to public voice across social groups; and on the range and independence of civil society and social movements.</div>
+      <div class="aspect-desc">Effects on the conditions under which citizens form, exchange, and revise political views – including through social media and other non-journalistic channels; on the depth, breadth, and authenticity of citizen participation in public life; on equal access to public voice across social groups; and on the range and independence of civil society and social movements.</div>
     </div>
   </div>
 
@@ -321,7 +321,7 @@
     <ol>
       <li><strong>Code all applicable categories.</strong> Include both direct and secondary or trickle-down effects. There is no limit on the number of codes per item, but each must be justifiable.</li>
       <li><strong>Ground code in the source where possible.</strong> If the democratic impact in a given category cannot be derived from the original text, flag as P4Dem inference.</li>
-      <li><strong>Primary vs. secondary codes.</strong> The most direct effect is primary; weaker effects are secondary. For threats and opportunities, coders may mark one code as primary and others as secondary where it is useful to distinguish, but this is optional — the priority is completeness. For solutions, the primary code is inherited from the connected threat; secondary codes may be added where the solution has broader democratic reach beyond that threat's primary impact area.</li>
+      <li><strong>Primary vs. secondary codes.</strong> The most direct effect is primary; weaker effects are secondary. For threats and opportunities, coders may mark one code as primary and others as secondary where it is useful to distinguish, but this is optional – the priority is completeness. For solutions, the primary code is inherited from the connected threat; secondary codes may be added where the solution has broader democratic reach beyond that threat's primary impact area.</li>
       <li><strong>Government vs. civil society.</strong> Pillar 2 covers what governments do; Pillar 3 covers what citizens and civil society can do. When an item touches both, code in both pillars.</li>
       <li><strong>Cross-cutting items</strong> (e.g. AI literacy, interdisciplinary research, public interest technologists) are coded to every category their mechanism of democratic effect touches.</li>
     </ol>
@@ -329,11 +329,11 @@
 
   <div class="note">
     <strong>Where this data lives in the codebase:</strong><br>
-    • <code>public/data/aspects.json</code> — machine-readable aspect definitions (code, name, pillar, description) used by the table at runtime<br>
-    • <code>docs/code_descriptions.md</code> — canonical text reference with full pillar abstracts and detailed coding guidance<br>
-    • <code>aixd-threatmap-master 2/src/lib/preprocessing.ts</code> — TypeScript data pipeline: parses (primary)/(secondary) markers, sorts aspects by pillar then code<br>
-    • <code>aixd-threatmap-master 2/preprocessing/preprocess.py</code> — Python data pipeline: same sorting logic (called by <code>bun run preprocess</code>)<br>
-    • <code>aixd-threatmap-master 2/data/raw/mapping.csv</code> — source CSV where aspect codes are assigned per row<br>
+    • <code>public/data/aspects.json</code> – machine-readable aspect definitions (code, name, pillar, description) used by the table at runtime<br>
+    • <code>docs/code_descriptions.md</code> – canonical text reference with full pillar abstracts and detailed coding guidance<br>
+    • <code>aixd-threatmap-master 2/src/lib/preprocessing.ts</code> – TypeScript data pipeline: parses (primary)/(secondary) markers, sorts aspects by pillar then code<br>
+    • <code>aixd-threatmap-master 2/preprocessing/preprocess.py</code> – Python data pipeline: same sorting logic (called by <code>bun run preprocess</code>)<br>
+    • <code>aixd-threatmap-master 2/data/raw/mapping.csv</code> – source CSV where aspect codes are assigned per row<br>
     • The column <strong>Democracy Aspects</strong> in the table renders aspect chips from <code>aspects.json</code>, with tooltips showing code + pillar + full description
   </div>
 

@@ -130,7 +130,7 @@ export const ThreatMap = () => {
     return () => observer.disconnect();
   }, [sentinelReady]);
 
-  // Sticky for ?embed=true: no IntroSection — always sticky (filterbar is at top of embed viewport)
+  // Sticky for ?embed=true: no IntroSection – always sticky (filterbar is at top of embed viewport)
   useEffect(() => {
     if (!isEmbedded) return;
     setIsSticky(true);
@@ -231,7 +231,7 @@ export const ThreatMap = () => {
               (click on the icons to explore)
             </span>
             {/* "for more information on our codes systems and processes, click
-                here" — pulled per client request (2026-09-14) until the link
+                here" – pulled per client request (2026-09-14) until the link
                 target is ready; follow-up expected from Mrinalini. */}
           </p>
           <p className="mb-4 max-w-[1180px] text-[13px] leading-relaxed text-foreground/60">
@@ -262,7 +262,7 @@ export const ThreatMap = () => {
 
       {!isEmbedded && <div ref={sentinelRef} aria-hidden className="h-px" />}
 
-      {/* No max-width cap here (unlike the hero/carousel sections above) —
+      {/* No max-width cap here (unlike the hero/carousel sections above) –
           the table needs 1320px (7 columns) to breathe, and production
           (master 2) never caps this wrapper either, just padding. Capping
           it to 1180px was forcing every column narrower than its own
@@ -298,7 +298,7 @@ export const ThreatMap = () => {
                     <li>Aspects of democracy</li>
                     <li>Harm mechanism</li>
                     <li>Pro-democracy activities</li>
-                    <li>Source — the publication each entry was extracted from</li>
+                    <li>Source – the publication each entry was extracted from</li>
                   </ul>
                   <p className="mt-2 text-sm text-muted-foreground">
                     Click a row to see the full verbatim quotes and complete mechanism / aspect

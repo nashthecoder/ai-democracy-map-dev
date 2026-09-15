@@ -13,7 +13,7 @@ import { forceCollide, forceManyBody, forceSimulation, forceX, forceY } from "d3
 const VIEW_W = 1040;
 // Taller than the other panels (480): the 4-corner cluster layout needs the
 // extra vertical room for the clusters + their labels to breathe. The carousel
-// measures each panel's height on view, so this just makes Q1 taller — nothing
+// measures each panel's height on view, so this just makes Q1 taller – nothing
 // downstream jumps.
 const VIEW_H = 680;
 const ZOOM = 1.18;
@@ -180,7 +180,7 @@ export const AspectBubbleMap = ({ items, aspects, onFilterTable }: AspectBubbleM
   const maxR = useMemo(() => Math.max(1, ...nodes.map((n) => n.r)), [nodes]);
   // Tooltip target: whatever is hovered, else whatever is pinned by a click.
   // A click keeps the tooltip up until the same node is clicked again, and
-  // expands it — hover shows the one-line definition, a pinned click shows the
+  // expands it – hover shows the one-line definition, a pinned click shows the
   // full codebook description.
   const tipNode = nodes.find((n) => n.code === (hoveredCode ?? selected)) ?? null;
   const tipPinned = tipNode != null && selected === tipNode.code;
