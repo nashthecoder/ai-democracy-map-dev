@@ -76,7 +76,12 @@ const Chip = ({
                   // 20px box squeezes those lines into and over each other.
                   // Releasing the height + adding real vertical padding and
                   // line-height lets the pill grow to fit its text instead.
-                  "h-auto min-w-0 max-w-full whitespace-normal break-words py-1 leading-snug"
+                  // Base Badge also centers its content (items-center
+                  // justify-center) – fine for one line, but once the name
+                  // wraps each line ends up independently centered ("Nationhood"
+                  // / "and Citizenship" each centered on its own). Left-align
+                  // instead so a wrapped name reads as one block of text.
+                  "h-auto min-w-0 max-w-full items-start justify-start whitespace-normal break-words py-1 text-left leading-snug"
                 : "whitespace-nowrap"
           }`}
           style={chipStyle}

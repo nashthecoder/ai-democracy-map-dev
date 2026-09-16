@@ -11,16 +11,45 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { forceCollide, forceManyBody, forceSimulation, forceX, forceY } from "d3";
 
 const VIEW_W = 1040;
-// Taller than the other panels (480): the 4-corner cluster layout needs the
-// extra vertical room for the clusters + their labels to breathe. The carousel
-// measures each panel's height on view, so this just makes Q1 taller – nothing
-// downstream jumps.
+// Layout canvas for the force sim only. The RENDERED svg height is derived from
+// the post-layout content (`svgH` below): the lowest 2-line label decides the
+// canvas bottom, so no dead band is ever left below the clusters and no label
+// can clip. Bubble placement is deterministic (seeded by code), so the fitted
+// height is stable too. The carousel measures each panel's height on view, so
+// this still just makes Q1 taller than the denser panels – nothing downstream
+// jumps.
 const VIEW_H = 680;
+// Floor for the fitted canvas: even with zero-width content the 4-corner
+// layout + parked tooltip still need this much vertical room.
+const MIN_SVG_H = 560;
 const ZOOM = 1.18;
 // Vertical room reserved below every bubble for its caption, fed into the
 // collide force so captions never land on a neighbouring bubble or caption.
 // Kept modest so clusters pack tight (bubbles sit close together).
 const CAPTION_RESERVE = 20;
+
+// Deterministic layout: the jitter below is seeded from each bubble's code, so
+// a load or refresh always reproduces the same bubble cloud. Math.random() here
+// re-rolled every mount and made the whole svg look like it "moves" between
+// loads (viz 2/4 are stable because their geometry never randomises).
+function hashSeed(str: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+function mulberry32(seed: number): () => number {
+  let a = seed;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
 // P4D brand tokens (globals.css): brick / grassroot / blue / lime.
 const PILLAR_COLORS: Record<string, string> = {
@@ -137,31 +166,32 @@ export const AspectBubbleMap = ({ items, aspects, onFilterTable }: AspectBubbleM
     }
     // 4-corner clustering: each pillar in its own quadrant, inset from edges
     // so the middle stays open (distinct centre cross for the parked tooltip).
-    // Corners sit further into the corners (0.21 / 0.79 across, 0.24 / 0.78
-    // down) than the original build so the centre gap is wide enough for the
-    // full tooltip to float without covering bubbles or captions. Global
-    // radius keeps cross-pillar size comparable (pack per-pillar would
-    // normalize away frequency). Rows spread so clusters use the full canvas
-    // height instead of leaving a dead band above the legend; 0.78 keeps the
-    // largest bottom bubble + its 2-line label clear of the viewBox edge.
-    // Smaller random jitter + a smaller caption reserve pack each pillar's
-    // bubbles closer together.
+    // 0.70 down (was 0.78) pulls the bottom clusters up so their 2-line labels
+    // end well inside the fitted canvas bottom – the leftover was a ~25px dead
+    // band under the clusters, and trimming the corner closes it. Global radius
+    // keeps cross-pillar size comparable (pack per-pillar would normalize away
+    // frequency). Rows spread so clusters use the full canvas height instead of
+    // leaving a dead band above the legend.
     const CORNERS: Record<string, { x: number; y: number }> = {
       "1": { x: VIEW_W * 0.21, y: VIEW_H * 0.24 },
       "2": { x: VIEW_W * 0.79, y: VIEW_H * 0.24 },
-      "3": { x: VIEW_W * 0.21, y: VIEW_H * 0.78 },
-      "4": { x: VIEW_W * 0.79, y: VIEW_H * 0.78 },
+      "3": { x: VIEW_W * 0.21, y: VIEW_H * 0.7 },
+      "4": { x: VIEW_W * 0.79, y: VIEW_H * 0.7 },
     };
     const maxVal = Math.max(1, ...flat.map((d) => d.value));
     // Enlarged bubbles. The collide force adds CAPTION_RESERVE so the caption
     // slot under each bubble is kept clear of neighbours.
     const getR = (v: number) => (12 + 31 * Math.sqrt(v / maxVal)) * ZOOM;
-    const simNodes: any[] = flat.map((d) => ({
-      ...d,
-      r: getR(d.value),
-      x: (CORNERS[d.pillar ?? "4"]?.x ?? VIEW_W / 2) + (Math.random() - 0.5) * 22,
-      y: (CORNERS[d.pillar ?? "4"]?.y ?? VIEW_H / 2) + (Math.random() - 0.5) * 22,
-    }));
+    const simNodes: any[] = flat.map((d) => {
+      // Per-code jitter, seeded so the cloud is identical on every load.
+      const rand = mulberry32(hashSeed(d.code ?? ""));
+      return {
+        ...d,
+        r: getR(d.value),
+        x: (CORNERS[d.pillar ?? "4"]?.x ?? VIEW_W / 2) + (rand() - 0.5) * 22,
+        y: (CORNERS[d.pillar ?? "4"]?.y ?? VIEW_H / 2) + (rand() - 0.5) * 22,
+      };
+    });
     const sim = forceSimulation(simNodes)
       .force("collide", forceCollide<any>((d: any) => d.r + CAPTION_RESERVE).strength(0.98))
       .force("x", forceX<any>((d: any) => CORNERS[d.pillar ?? "4"]?.x ?? VIEW_W / 2).strength(0.1))
@@ -178,6 +208,25 @@ export const AspectBubbleMap = ({ items, aspects, onFilterTable }: AspectBubbleM
   }, [aspects, freq]);
 
   const maxR = useMemo(() => Math.max(1, ...nodes.map((n) => n.r)), [nodes]);
+  // Lowest rendered content in the layout canvas: every labelled node adds its
+  // wrapped caption (y + r + 18, +11 per extra line) below its bubble, so the
+  // canvas bottom that fits everything is `contentBottom`. The rendered svg is
+  // sized to that + a little slack – identical mechanism to HarmMechanismMap's
+  // dynamic svgH, which is why that panel never shows a dead band at the bottom.
+  const contentBottom = useMemo(() => {
+    let max = 0;
+    for (const n of nodes) {
+      if (n.r > maxR * 0.38) {
+        const label = SHORT_LABELS[n.code] ?? n.name;
+        const lines = wrapLabelLines(label, 14, 2).length;
+        max = Math.max(max, n.y + n.r + 18 + (lines - 1) * 11);
+      } else {
+        max = Math.max(max, n.y + n.r);
+      }
+    }
+    return max;
+  }, [nodes, maxR]);
+  const svgH = Math.max(MIN_SVG_H, Math.ceil(contentBottom + 18));
   // Tooltip target: whatever is hovered, else whatever is pinned by a click.
   // A click keeps the tooltip up until the same node is clicked again, and
   // expands it – hover shows the one-line definition, a pinned click shows the
@@ -269,7 +318,7 @@ export const AspectBubbleMap = ({ items, aspects, onFilterTable }: AspectBubbleM
       <div
         ref={mapRef}
         className="relative mt-2"
-        style={{ height: VIEW_H }}
+        style={{ height: svgH }}
         onClick={(e) => {
           if (!(e.target as Element).closest(".viz-node")) {
             setHoveredCode(null);
@@ -278,11 +327,11 @@ export const AspectBubbleMap = ({ items, aspects, onFilterTable }: AspectBubbleM
           }
         }}
       >
-        <div className="overflow-x-auto" style={{ height: VIEW_H }}>
+        <div className="overflow-x-auto" style={{ height: svgH }}>
           <svg
             width="100%"
-            height={VIEW_H}
-            viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+            height={svgH}
+            viewBox={`0 0 ${VIEW_W} ${svgH}`}
             style={{ display: "block", minWidth: VIEW_W }}
             role="img"
             aria-label={TITLE}

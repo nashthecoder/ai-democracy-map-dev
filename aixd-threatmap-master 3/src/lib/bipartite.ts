@@ -107,7 +107,7 @@ const hm2Cmp = (a: (number | string)[], b: (number | string)[]) => {
 export const hm2Lbl = (c: string) => HM2_L[c] || HM2_TIER_SHORT[c] || HM2_BEN_NAME[c] || c;
 
 export const HM2A_NOTE_BASE =
-  "a link means an entry mentions both together; thicker links are mentioned more often. Click any box or link to unfold the detail behind it.";
+  "A link means an entry mentions both together; thicker links are mentioned more often. Click any box or link to unfold the detail behind it.";
 
 const lt = (c: string) => HM2_HB.tier[c] || [];
 

@@ -288,8 +288,12 @@ export const DataTable = ({
             */}
           </div>
         ),
+        // Never actually reached in the table body — the row-rendering loop
+        // below overrides the "aspects" column with its own cell (compact
+        // wrapping, matching the harm/benefit chips). Kept in sync so this
+        // definition isn't misleading if something else ever calls it.
         cell: ({ row }) => (
-          <AspectChips codes={orderAspects(row.original.aspects)} aspects={aspects} maxVisible={3} fadeWidth={40} />
+          <AspectChips codes={orderAspects(row.original.aspects)} aspects={aspects} maxVisible={3} compact />
         ),
         filterFn: (row, _columnId, filterValue: string[]) => {
           if (!filterValue || filterValue.length === 0) return true;
@@ -603,39 +607,22 @@ export const DataTable = ({
                                   </span>
                                 </div>
                               ) : cell.column.id === "aspects" ? (
-                                <div className="flex min-h-19 items-center py-2">
-                                  {/* Full names once the column is wide enough (xl); on
-                                      narrower widths show the beginning of the name,
-                                      truncating with an ellipsis as the window shrinks
-                                      (so it's obvious a wider screen reveals more) – the
-                                      full name is on hover and in the expanded row. */}
-                                  <div
-                                    className="hidden overflow-hidden xl:flex xl:items-center"
-                                    style={{
-                                      maskImage:
-                                        "linear-gradient(to right, black calc(100% - 2.5rem), transparent 100%)",
-                                    }}
-                                  >
-                                    <AspectChips
-                                      codes={orderAspects(row.original.aspects)}
-                                      aspects={aspects}
-                                      maxVisible={3}
-                                      fadeWidth={40}
-                                    />
-                                  </div>
-                                  <div className="flex min-w-0 flex-wrap items-center xl:hidden [&_*]:min-w-0 [&>*]:min-w-0">
-                                    {/* Below xl the column is only ~50-70px wide – too
-                                        narrow for full names at any padding. codeOnly
-                                        keeps each pill to its short code ("2.1"), which
-                                        actually fits; full name + pillar + description
-                                        stay one hover away in the tooltip. */}
-                                    <AspectChips
-                                      codes={orderAspects(row.original.aspects)}
-                                      aspects={aspects}
-                                      maxVisible={3}
-                                      codeOnly
-                                    />
-                                  </div>
+                                // Matches how the harm/benefit chips already behave: wrap the
+                                // full name onto 2-3 lines inside whatever the column's fixed
+                                // width actually is, at any screen size — no breakpoint jump.
+                                // The old version showed full names (fading past ~2.5rem) only
+                                // once the column reached xl, and fell back to bare code numbers
+                                // ("2.1") below that — so most viewers, most of the time, saw
+                                // numbers instead of names. compact wrapping keeps a readable
+                                // name visible at every width; full name/pillar/description are
+                                // still one hover away in the tooltip.
+                                <div className="flex min-h-19 min-w-0 items-center py-2 [&_*]:min-w-0 [&>*]:min-w-0">
+                                  <AspectChips
+                                    codes={orderAspects(row.original.aspects)}
+                                    aspects={aspects}
+                                    maxVisible={3}
+                                    compact
+                                  />
                                 </div>
                               ) : cell.column.id === "description" ||
                                 cell.column.id === "solution" ? (
